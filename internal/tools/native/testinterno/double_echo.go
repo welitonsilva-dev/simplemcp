@@ -1,6 +1,6 @@
 package native
 
-import "simplemcp_v0.1/internal/tools"
+import "simplemcp/internal/tools"
 
 func init() {
 	tools.GlobalRegistry.Register(&DoubleEcho{})

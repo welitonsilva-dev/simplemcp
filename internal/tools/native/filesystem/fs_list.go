@@ -1,19 +1,19 @@
-package native
+package filesystem
 
 import (
 	"bytes"
 	"os/exec"
 	"runtime"
 
-	"simplemcp_v0.1/internal/tools"
+	"simplemcp/internal/tools"
+	"simplemcp/internal/tools/native"
 )
 
 func init() {
 	tools.GlobalRegistry.Register(&FSList{})
 }
 
-type FSList struct {
-}
+type FSList struct{}
 
 func (l *FSList) Name() string {
 	return "fs_list"
@@ -43,7 +43,7 @@ Parâmetros:
 - path (string, opcional)
 
 Comportamento:
-- Se nenhum path for informado, usa o diretório atual.
+- Se nenhum path for informado, usa o diretório atual do usuário (CONTAINER_CWD).
 - Linux: executa "ls -a [path]"
 - Windows: executa "dir /a"
 
@@ -56,22 +56,20 @@ Uso comum:
 
 func (l *FSList) Execute(params map[string]interface{}) (interface{}, error) {
 
-	path := "."
+	// Usa o CWD compartilhado como padrão
+	// ResolvePath e native.CwdState estão definidos em state.go (mesmo pacote)
+	path := native.CwdState.Get()
 
 	if p, ok := params["path"].(string); ok && p != "" {
-		path = p
+		path = native.ResolvePath(native.CwdState.Get(), p)
 	}
 
 	var cmd *exec.Cmd
 
 	if runtime.GOOS == "windows" {
-
 		cmd = exec.Command("cmd", "/C", "dir", "/a", path)
-
 	} else {
-
 		cmd = exec.Command("ls", "-a", path)
-
 	}
 
 	var out bytes.Buffer
