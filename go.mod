@@ -1,3 +1,3 @@
-module simplemcp_v0.1
+module simplemcp
 
 go 1.25.7

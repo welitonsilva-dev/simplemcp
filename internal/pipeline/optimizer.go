@@ -3,7 +3,7 @@ package pipeline
 import (
 	"fmt"
 
-	"simplemcp_v0.1/internal/config"
+	"simplemcp/internal/config"
 )
 
 // OptimizeInput executa todo pipeline antes do LLM

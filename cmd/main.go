@@ -5,11 +5,14 @@ import (
 	"log"
 	"net/http"
 
-	"simplemcp_v0.1/internal/agent"
-	"simplemcp_v0.1/internal/config"
-	"simplemcp_v0.1/internal/llm"
-	"simplemcp_v0.1/internal/server"
-	"simplemcp_v0.1/internal/tools"
+	"simplemcp/internal/agent"
+	"simplemcp/internal/config"
+	"simplemcp/internal/llm"
+	"simplemcp/internal/server"
+	"simplemcp/internal/tools"
+	// pacotes de ferramentas nativas
+	_ "simplemcp/internal/tools/native/testinterno"
+	_ "simplemcp/internal/tools/native/filesystem"
 )
 
 func main() {

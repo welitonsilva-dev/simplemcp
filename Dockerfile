@@ -8,7 +8,7 @@ COPY go.mod go.sum* ./
 RUN go mod download
 
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o mcp-server ./cmd/server
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o mcp-server ./cmd
 
 # stage 2 — runtime
 FROM debian:bookworm-slim

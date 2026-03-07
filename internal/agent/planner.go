@@ -5,9 +5,9 @@ import (
 	"errors"
 	"fmt"
 
-	"simplemcp_v0.1/internal/llm"
-	"simplemcp_v0.1/internal/pipeline"
-	"simplemcp_v0.1/utils"
+	"simplemcp/internal/llm"
+	"simplemcp/internal/pipeline"
+	"simplemcp/utils"
 )
 
 // Step representa um passo do plano

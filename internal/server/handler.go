@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"simplemcp_v0.1/internal/protocol"
-	"simplemcp_v0.1/internal/tools"
+	"simplemcp/internal/protocol"
+	"simplemcp/internal/tools"
 )
 
 type MCPServer struct {

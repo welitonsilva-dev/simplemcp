@@ -19,7 +19,10 @@ services:
     ports:
       - "8081:8081"
     volumes:
-      - ./:/app/config   # mapeia a pasta host config
+      - ${HOST_ROOT}:/app/host   # disco do host injetado dinamicamente pelo cli.sh ou cli.ps1
+    environment:
+      - HOST_ROOT=${HOST_ROOT}
+      - HOST_CWD=${HOST_CWD}
     env_file:
       - .env
     depends_on:

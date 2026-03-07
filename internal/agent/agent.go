@@ -3,7 +3,7 @@ package agent
 import (
 	"fmt"
 
-	"simplemcp_v0.1/internal/tools"
+	"simplemcp/internal/tools"
 )
 
 // Run recebe input e o plano e executa as tools
