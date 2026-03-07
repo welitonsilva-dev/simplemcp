@@ -3,7 +3,8 @@
 # =============================================================
 #  update-tool-imports.sh
 #  Detecta todos os subpacotes em internal/tools/native/
-#  e atualiza o bloco de imports blank no cmd/main.go
+#  e internal/tools/plugins/ e atualiza o bloco de imports
+#  blank no cmd/main.go
 #
 #  Uso: bash update-tool-imports.sh
 #  Execute na raiz do projeto.
@@ -12,8 +13,10 @@
 set -e
 
 MAIN_FILE="cmd/main.go"
-TOOLS_DIR="internal/tools/native"
-MARKER="pacotes de ferramentas nativas"
+NATIVE_DIR="internal/tools/native"
+PLUGINS_DIR="internal/tools/plugins"
+MARKER_NATIVE="pacotes de ferramentas nativas"
+MARKER_PLUGINS="pacotes de ferramentas plugins"
 
 # ── Validações ────────────────────────────────────────────────
 
@@ -22,8 +25,8 @@ if [ ! -f "$MAIN_FILE" ]; then
   exit 1
 fi
 
-if [ ! -d "$TOOLS_DIR" ]; then
-  echo "❌ Diretório $TOOLS_DIR não encontrado."
+if [ ! -d "$NATIVE_DIR" ] && [ ! -d "$PLUGINS_DIR" ]; then
+  echo "❌ Nenhum diretório de tools encontrado ($NATIVE_DIR ou $PLUGINS_DIR)."
   exit 1
 fi
 
@@ -34,35 +37,51 @@ if [ -z "$MODULE" ]; then
 fi
 
 echo "📦 Module  : $MODULE"
-echo "📁 Scanning: $TOOLS_DIR"
 echo ""
 
-# ── Detecta subpacotes e injeta imports ───────────────────────
+# ── Função para escanear e injetar imports ───────────────────
 
 ADDED=0
 SKIPPED=0
 
-for dir in "$TOOLS_DIR"/*/; do
-  [ -d "$dir" ] || continue
+inject_imports() {
+  local dir=$1
+  local label=$2
+  local marker=$3
 
-  gofiles=$(find "$dir" -maxdepth 1 -name "*.go" | head -1)
-  [ -z "$gofiles" ] && continue
-
-  # Remove trailing slash e monta import path
-  pkg="${MODULE}/${dir%/}"
-
-  if grep -qF "\"$pkg\"" "$MAIN_FILE"; then
-    echo "   ⏭  Já existe : $pkg"
-    SKIPPED=$((SKIPPED + 1))
-  else
-    # Injeta linha após o marcador
-    sed -i "/$MARKER/a \\\\t_ \"$pkg\"" "$MAIN_FILE"
-    echo "   ➕ Adicionado: $pkg"
-    ADDED=$((ADDED + 1))
+  if [ ! -d "$dir" ]; then
+    echo "⚠️  Diretório não encontrado, pulando: $dir"
+    return
   fi
-done
 
-echo ""
+  echo "📁 Scanning $label: $dir"
+
+  for subdir in "$dir"/*/; do
+    [ -d "$subdir" ] || continue
+
+    gofiles=$(find "$subdir" -maxdepth 1 -name "*.go" | head -1)
+    [ -z "$gofiles" ] && continue
+
+    pkg="${MODULE}/${subdir%/}"
+
+    if grep -qF "\"$pkg\"" "$MAIN_FILE"; then
+      echo "   ⏭  Já existe : $pkg"
+      SKIPPED=$((SKIPPED + 1))
+    else
+      sed -i "/$marker/a \\\\t_ \"$pkg\"" "$MAIN_FILE"
+      echo "   ➕ Adicionado: $pkg"
+      ADDED=$((ADDED + 1))
+    fi
+  done
+
+  echo ""
+}
+
+# ── Executa para native e plugins ────────────────────────────
+
+inject_imports "$NATIVE_DIR" "native" "$MARKER_NATIVE"
+inject_imports "$PLUGINS_DIR" "plugins" "$MARKER_PLUGINS"
+
 echo "────────────────────────────────────────"
 echo "✅ Concluído: $ADDED adicionado(s), $SKIPPED já existia(m)"
 echo "────────────────────────────────────────"
@@ -74,4 +93,4 @@ echo "📄 Bloco atual em $MAIN_FILE:"
 echo ""
 grep -n "pacotes de ferramentas\|_ \"$MODULE" "$MAIN_FILE"
 echo ""
-echo "💡 Para nova tool: crie internal/tools/native/<nome>/ e rode este script."
+echo "💡 Para nova tool: crie $NATIVE_DIR/<nome>/ ou $PLUGINS_DIR/<nome>/ e rode este script."
