@@ -5,6 +5,7 @@ import (
 	"os/exec"
 	"runtime"
 
+	"simplemcp/internal/logger"
 	"simplemcp/internal/tools"
 	"simplemcp/internal/tools/native"
 )
@@ -81,6 +82,7 @@ func (l *FSList) Execute(params map[string]interface{}) (interface{}, error) {
 	err := cmd.Run()
 
 	if err != nil {
+		logger.Error("fs_list error: %v, stderr: %s", err, stderr.String())
 		return stderr.String(), err
 	}
 

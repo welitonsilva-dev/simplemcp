@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"net/http"
+	"simplemcp/internal/logger"
 )
 
 type Client struct {
@@ -46,6 +47,7 @@ func (c *Client) Generate(prompt string) (string, error) {
 	)
 
 	if err != nil {
+		logger.Error("failed to send request: %v", err)
 		return "", err
 	}
 

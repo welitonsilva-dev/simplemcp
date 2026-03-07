@@ -3,6 +3,7 @@ package agent
 import (
 	"fmt"
 
+	"simplemcp/internal/logger"
 	"simplemcp/internal/tools"
 )
 
@@ -27,6 +28,7 @@ func Run(plan Plan) (string, error) {
 
 		result, err := tool.Execute(step.Params)
 		if err != nil {
+			logger.Error("failed to execute tool '%s': %v", step.Tool, err.Error())
 			results += fmt.Sprintf("step %d: erro ao executar tool '%s'\n", i+1, step.Tool)
 			continue
 		}

@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"simplemcp/internal/llm"
+	"simplemcp/internal/logger"
 	"simplemcp/internal/pipeline"
 	"simplemcp/utils"
 )
@@ -39,6 +40,7 @@ func (p *Planner) Generate(userInput string, toolRegistry string) (*Plan, error)
 
 	input, err := pipeline.OptimizeInput(userInput)
 	if err != nil {
+		logger.Error("failed to optimize input: %v", err)
 		return nil, errors.New("Erro ao otimizar o input")
 	}
 
@@ -49,6 +51,7 @@ func (p *Planner) Generate(userInput string, toolRegistry string) (*Plan, error)
 	// gerar plano usando o LLM
 	llmResp, err := p.LLM.Generate(prompt)
 	if err != nil {
+		logger.Error("failed to generate plan: %v", err)
 		return nil, err
 	}
 
@@ -56,6 +59,7 @@ func (p *Planner) Generate(userInput string, toolRegistry string) (*Plan, error)
 
 	var plan Plan
 	if err := json.Unmarshal([]byte(clean), &plan); err != nil {
+		logger.Error("failed to parse plan JSON: %v, response: %s", err, clean)
 		return nil, errors.New(clean + err.Error())
 	}
 

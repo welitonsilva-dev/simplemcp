@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 
+	"simplemcp/internal/logger"
 	"simplemcp/internal/tools"
 	"simplemcp/internal/tools/native"
 )
@@ -86,32 +87,31 @@ func (n *FSNavigate) Execute(params map[string]interface{}) (interface{}, error)
 
 func navigateCD(path string) (string, error) {
 	if path == "" {
+		logger.Error("fs_navigate error: path vazio para cd")
 		return "", fmt.Errorf("informe um path. Ex: cd ../ ou cd /home/user/projetos")
 	}
 
 	resolved := native.ResolvePath(native.CwdState.Get(), path)
 
-	// Não permite sair do mountpoint
-	if !strings.HasPrefix(resolved, native.HostMount) {
-		resolved = native.HostMount
-	}
-
 	info, err := os.Stat(resolved)
 	if err != nil {
-		return "", fmt.Errorf("diretório não encontrado: %s", native.ToHostPath(resolved))
+		logger.Error("fs_navigate error: diretório não encontrado: %s", resolved)
+		return "", fmt.Errorf("diretório não encontrado: %s", resolved)
 	}
 	if !info.IsDir() {
-		return "", fmt.Errorf("%s não é um diretório", native.ToHostPath(resolved))
+		logger.Error("fs_navigate error: %s não é um diretório", resolved)
+		return "", fmt.Errorf("%s não é um diretório", resolved)
 	}
 
 	native.CwdState.Set(resolved)
 
-	return fmt.Sprintf("✔ Navegou para: %s", native.ToHostPath(resolved)), nil
+	return fmt.Sprintf("✔ Navegou para: %s", resolved), nil
 }
 
 func listDrives() (string, error) {
 	entries, err := os.ReadDir(native.HostMount)
 	if err != nil {
+		logger.Error("fs_navigate error: falha ao listar discos em %s: %v", native.HostMount, err)
 		return "", fmt.Errorf("erro ao listar discos: %w", err)
 	}
 

@@ -83,7 +83,7 @@ Exemplo de saída para intenção desconhecida:
       "params": {}
     }
   ],
-  "confidence": 0.9
+  "confidence": 0.6
 }
 
 Validação final obrigatória:
