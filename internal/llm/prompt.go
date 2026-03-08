@@ -54,6 +54,10 @@ Regra obrigatória de intenção:
 - Nunca use uma ferramenta apenas porque existe um texto que pode ser passado como parâmetro.
 - A ferramenta deve representar claramente a intenção do usuário.
 
+Se a mensagem indicar claramente a intenção associada
+às palavras-chave de uma ferramenta, use essa ferramenta,
+mesmo que existam pequenos erros de digitação.
+
 Ferramentas disponíveis:
 %s
 
