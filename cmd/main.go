@@ -16,8 +16,8 @@ import (
 	_ "simplemcp/internal/tools/native/filesystem"
 	_ "simplemcp/internal/tools/native/testinterno"
 
-	// pacotes de ferramentas plugins
-	_ "simplemcp/internal/tools/plugins/docker"
+	// pacotes de ferramentas externas/plugins
+	_ "github.com/weliton/simplemcpplugins/hello"
 )
 
 func main() {

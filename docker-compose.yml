@@ -14,7 +14,9 @@ services:
     restart: unless-stopped
 
   mcp-server:
-    build: .
+    build:
+      context: ..
+      dockerfile: simplemcp/Dockerfile
     container_name: mcp-server
     ports:
       - "8081:8081"
@@ -24,6 +26,7 @@ services:
     environment:
       - HOST_ROOT=${HOST_ROOT}
       - HOST_CWD=${HOST_CWD}
+      - LOG_DIR=/app/logs
     env_file:
       - .env
     depends_on:
