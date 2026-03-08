@@ -1,4 +1,4 @@
-package main
+package generate
 
-//go:generate go run cmd/genplugins/main.go
-//go:generate go run cmd/gentools/main.go
+//go:generate go run scripts/genplugins/main.go
+//go:generate go run scripts/gentools/main.go
