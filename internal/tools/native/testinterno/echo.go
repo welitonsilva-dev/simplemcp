@@ -3,7 +3,7 @@ package native
 import "simplemcp/internal/tools"
 
 func init() {
-	tools.GlobalRegistry.Register(&Echo{})
+	tools.GlobalRegistry().Register(&Echo{})
 }
 
 type Echo struct {

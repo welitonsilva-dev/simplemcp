@@ -16,7 +16,7 @@ func Run(plan Plan) (string, error) {
 
 	results := ""
 	for i, step := range plan.Steps {
-		tool, exists := tools.GlobalRegistry.Get(step.Tool)
+		tool, exists := tools.GlobalRegistry().Get(step.Tool)
 		if !exists {
 			results += fmt.Sprintf("step %d: tool '%s' não existe\n", i+1, step.Tool)
 			continue

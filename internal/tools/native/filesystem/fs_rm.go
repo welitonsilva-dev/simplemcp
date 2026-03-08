@@ -10,7 +10,7 @@ import (
 )
 
 func init() {
-	tools.GlobalRegistry.Register(&FSRm{})
+	tools.GlobalRegistry().Register(&FSRm{})
 }
 
 type FSRm struct{}

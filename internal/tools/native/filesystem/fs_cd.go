@@ -12,7 +12,7 @@ import (
 )
 
 func init() {
-	tools.GlobalRegistry.Register(&FSCd{})
+	tools.GlobalRegistry().Register(&FSCd{})
 }
 
 type FSCd struct{}

@@ -11,7 +11,7 @@ import (
 )
 
 func init() {
-	tools.GlobalRegistry.Register(&FSTouch{})
+	tools.GlobalRegistry().Register(&FSTouch{})
 }
 
 type FSTouch struct{}

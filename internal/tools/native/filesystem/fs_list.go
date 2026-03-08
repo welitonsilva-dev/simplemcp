@@ -11,7 +11,7 @@ import (
 )
 
 func init() {
-	tools.GlobalRegistry.Register(&FSList{})
+	tools.GlobalRegistry().Register(&FSList{})
 }
 
 type FSList struct{}

@@ -9,5 +9,5 @@ type Tool interface {
 }
 
 func Register(t Tool) {
-	tools.GlobalRegistry.Register(t)
+	tools.GlobalRegistry().Register(t)
 }

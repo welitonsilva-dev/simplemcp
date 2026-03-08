@@ -18,6 +18,7 @@ import (
 
 	// pacotes de ferramentas externas/plugins
 	_ "github.com/weliton/simplemcpplugins/hello"
+	_ "github.com/weliton/simplemcpplugins/dockercmd"
 )
 
 func main() {
@@ -51,7 +52,7 @@ func main() {
 	toolRegistry := tools.GlobalRegistry
 
 	logger.Info("🚀 registrando ferramentas")
-	srv := server.NewServer(toolRegistry.List())
+	srv := server.NewServer(toolRegistry().List())
 
 	// -------------------------------
 	// Endpoints

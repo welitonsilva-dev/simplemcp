@@ -2,87 +2,119 @@ package tools
 
 import (
 	"fmt"
+	"reflect"
 	"sort"
 	"strings"
+	"sync"
 )
 
-var GlobalRegistry = NewRegistry()
+type ToolOrigin string
 
-// Registry armazena e gerencia todas as ferramentas disponíveis
+const (
+	OriginNative ToolOrigin = "native"
+	OriginPlugin ToolOrigin = "plugin"
+)
+
+type registeredTool struct {
+	tool   Tool
+	origin ToolOrigin
+}
+
 type Registry struct {
-	tools map[string]Tool
+	mu    sync.RWMutex
+	tools map[string]registeredTool
 }
 
-// NewRegistry cria um novo registry de ferramentas
+var (
+	globalRegistry *Registry
+	once           sync.Once
+)
+
+func GlobalRegistry() *Registry {
+	once.Do(func() {
+		globalRegistry = &Registry{
+			tools: make(map[string]registeredTool),
+		}
+	})
+	return globalRegistry
+}
+
+// NewRegistry mantém compatibilidade — sempre retorna o singleton
 func NewRegistry() *Registry {
-	return &Registry{
-		tools: make(map[string]Tool),
-	}
+	return GlobalRegistry()
 }
 
-// Register adiciona uma nova tool ao registry
 func (r *Registry) Register(t Tool) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
 
 	name := t.Name()
-
 	if _, exists := r.tools[name]; exists {
 		return fmt.Errorf("tool '%s' já registrada", name)
 	}
 
-	r.tools[name] = t
+	pkgPath := reflect.TypeOf(t).Elem().PkgPath()
+	origin := OriginPlugin
+	if strings.Contains(pkgPath, "tools/native") {
+		origin = OriginNative
+	}
+
+	r.tools[name] = registeredTool{tool: t, origin: origin}
 	return nil
 }
 
-// Get retorna uma tool pelo nome
 func (r *Registry) Get(name string) (Tool, bool) {
-	t, ok := r.tools[name]
-	return t, ok
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	entry, ok := r.tools[name]
+	return entry.tool, ok
 }
 
-// List retorna todas as tools registradas
 func (r *Registry) List() []Tool {
-
+	r.mu.RLock()
+	defer r.mu.RUnlock()
 	list := make([]Tool, 0, len(r.tools))
-
-	for _, t := range r.tools {
-		list = append(list, t)
+	for _, entry := range r.tools {
+		list = append(list, entry.tool)
 	}
-
 	return list
 }
 
-// Names retorna os nomes das tools ordenados
+func (r *Registry) ListByOrigin(origin ToolOrigin) []Tool {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	var list []Tool
+	for _, entry := range r.tools {
+		if entry.origin == origin {
+			list = append(list, entry.tool)
+		}
+	}
+	return list
+}
+
 func (r *Registry) Names() []string {
-
+	r.mu.RLock()
+	defer r.mu.RUnlock()
 	names := make([]string, 0, len(r.tools))
-
 	for name := range r.tools {
 		names = append(names, name)
 	}
-
 	sort.Strings(names)
-
 	return names
 }
 
-// AvailableTools retorna uma lista formatada para prompt de LLM
 func (r *Registry) AvailableTools() string {
-
+	r.mu.RLock()
+	defer r.mu.RUnlock()
 	var builder strings.Builder
-
-	names := r.Names()
-
-	for _, name := range names {
-
-		tool := r.tools[name]
-
-		builder.WriteString(
-			fmt.Sprintf("%s → %s\n",
-				tool.Name(),
-				tool.Description(),
-			),
-		)
+	names := make([]string, 0, len(r.tools))
+	for name := range r.tools {
+		names = append(names, name)
 	}
-
+	sort.Strings(names)
+	for _, name := range names {
+		entry := r.tools[name]
+		builder.WriteString(fmt.Sprintf("%s → %s\n", entry.tool.Name(), entry.tool.Description()))
+	}
 	return builder.String()
 }

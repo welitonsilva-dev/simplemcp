@@ -10,7 +10,7 @@ import (
 )
 
 func init() {
-	tools.GlobalRegistry.Register(&FSMkdir{})
+	tools.GlobalRegistry().Register(&FSMkdir{})
 }
 
 type FSMkdir struct{}
