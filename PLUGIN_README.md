@@ -239,8 +239,8 @@ Uso comum:
 Abaixo o exemplo completo de um plugin funcional que exibe uma saudação personalizada:
 
 ```go
-// simplemcpplugins/helloworld/print_helloworld.go
-package helloworld
+// simplemcpplugins/hello/hello.go
+package hello
  
 import (
     "fmt"
@@ -248,16 +248,16 @@ import (
 )
  
 func init() {
-    sdk.Register(&HelloTool{})
+    sdk.Register(&Hello{})
 }
  
-type HelloTool struct{}
+type Hello struct{}
  
-func (t *HelloTool) Name() string {
+func (t *Hello) Name() string {
     return "hello"
 }
  
-func (t *HelloTool) Description() string {
+func (t *Hello) Description() string {
     return `
 Prioridade de interpretação:
 
@@ -289,7 +289,7 @@ Uso comum:
 `
 }
  
-func (t *HelloTool) Execute(params map[string]interface{}) (any, error) {
+func (t *Hello) Execute(params map[string]interface{}) (any, error) {
     name, _ := params["name"].(string)
     if name == "" {
         name = "mundo"
