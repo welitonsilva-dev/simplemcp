@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"os"
 
 	"simplemcp/internal/agent"
 	"simplemcp/internal/config"
@@ -15,17 +16,21 @@ import (
 	// pacotes de ferramentas nativas
 	_ "simplemcp/internal/tools/native/filesystem"
 	_ "simplemcp/internal/tools/native/testinterno"
-
 	// pacotes de ferramentas externas/plugins
 	_ "github.com/weliton/simplemcpplugins/hello"
 	_ "github.com/weliton/simplemcpplugins/dockercmd"
 )
 
 func main() {
-	if err := logger.Init("/app/logs"); err != nil {
+
+	logger.Info("🚀 iniciando main")
+	logDir := os.Getenv("LOG_DIR")
+	if logDir == "" {
+		logDir = "logs"
+	}
+	if err := logger.Init(logDir); err != nil {
 		log.Fatal(err)
 	}
-	logger.Info("🚀 iniciando main")
 
 	logger.Info("🚀 carregando configurações")
 	cfg := config.Load()
@@ -78,7 +83,7 @@ func main() {
 		// Cria planner
 		planner := agent.NewPlanner(llmClient)
 
-		plan, err := planner.Generate(body.Message, toolRegistry.AvailableTools())
+		plan, err := planner.Generate(body.Message, toolRegistry().AvailableTools())
 		if err != nil {
 			logger.Error("invalid body: %v", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -110,7 +115,7 @@ func main() {
 		// Cria planner
 		planner := agent.NewPlanner(llmClient)
 
-		plan, err := planner.Generate(body.Message, toolRegistry.AvailableTools())
+		plan, err := planner.Generate(body.Message, toolRegistry().AvailableTools())
 		if err != nil {
 			logger.Error("failed to generate plan: %v", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)

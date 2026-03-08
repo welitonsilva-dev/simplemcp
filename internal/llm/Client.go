@@ -3,6 +3,7 @@ package llm
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"simplemcp/internal/logger"
 )
@@ -54,8 +55,15 @@ func (c *Client) Generate(prompt string) (string, error) {
 	defer resp.Body.Close()
 
 	var result Response
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		logger.Error("failed to decode response: %v", err)
+		return "", err
+	}
 
-	json.NewDecoder(resp.Body).Decode(&result)
+	if result.Response == "" {
+		logger.Error("empty response from ollama")
+		return "", fmt.Errorf("empty response from ollama")
+	}
 
 	return result.Response, nil
 }
