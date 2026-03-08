@@ -86,7 +86,7 @@ Envie comandos em linguagem natural para o servidor MCP.
 
 Interaja diretamente com o modelo de linguagem local via Ollama.
 
-**Rota:** `POST http://ollama:11434/api/generate`
+**Rota:** `POST http://localhost:11434/api/generate`
 
 **Body:**
 ```json
