@@ -11,8 +11,8 @@ A arquitetura é composta por dois projetos separados:
 
 > | Projeto |Responsabilidade| 
 > | ------------ | ------------ |
-> | simplemcp  | Projeto principal. Expõe o SDK público e orquestra as tools.  |
-> |simplemcpplugins| Repositório de plugins. Cada subpasta é uma tool independente. |
+> | simplemcp  | Projeto principal. Expõe o SDK público e orquestra as tools. [SAIBA MAIS](./README.md)  |
+> |simplemcpplugins| Repositório de plugins. Cada subpasta é uma tool independente. [REPOSITÓRIO](https://github.com/welitonsilva-dev/simplemcpplugins) |
 
 ---
 

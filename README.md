@@ -62,7 +62,7 @@ Já existe a categoria `filesystem` com tools para interação com o sistema de 
 - Entre outras
 
 ### Projeto de Exemplo
-Existe um plugin de exemplo (`hello`) criado com base no `PLUGIN_README.md`, que serve como referência para novos contribuidores criarem suas próprias tools.
+Existe um plugin de exemplo (`hello`) criado com base no [PLUGIN_README.md](./PLUGIN_README.md), que serve como referência para novos contribuidores criarem suas próprias tools.
 
 ---
 
@@ -129,7 +129,7 @@ A arquitetura será baseada em uma interface Go simples (`AIProvider`), mantendo
 
 ## Contribuindo
 
-O projeto possui um sistema de plugins documentado no `PLUGIN_README.md`. Para criar uma nova tool, basta implementar a interface padrão:
+O projeto possui um sistema de plugins documentado no [PLUGIN_README.md](./PLUGIN_README.md). Para criar uma nova tool, basta implementar a interface padrão:
 
 ```go
 type Tool interface {
