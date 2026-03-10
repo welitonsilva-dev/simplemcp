@@ -102,41 +102,69 @@ Dentro da pasta criada, crie o arquivo principal do plugin. O arquivo deve:
 ```go
 // simplemcpplugins/meu_plugin/plugin.go
 package meuplugin
- 
+
 import (
-    "fmt"
-    "simplemcp/sdk"
+	"fmt"
+	"simplemcp/sdk"
 )
- 
+
+// init é executado automaticamente quando o pacote é carregado.
+// Aqui registramos a tool no SDK para que ela fique disponível
+// para o sistema MCP e possa ser descoberta pela LLM.
 func init() {
-    sdk.Register(&MinhaTool{})
+	sdk.Register(&MinhaTool{})
 }
- 
+
+// MinhaTool define a estrutura da ferramenta.
+// Pode conter campos caso sua tool precise manter estado ou configuração.
 type MinhaTool struct{}
- 
+
+// Name retorna o identificador único da tool.
+// Esse nome será utilizado pelo sistema para referenciar a ferramenta.
 func (t *MinhaTool) Name() string {
-    return "minha_tool"
+	return "minha_tool"
 }
- 
+
+// Description fornece o contexto que a LLM utiliza para decidir
+// quando essa ferramenta deve ser utilizada.
+//
+// É recomendável incluir:
+// - palavras associadas ou sinônimos
+// - exemplos de intenção do usuário
+// - instruções claras de uso
+// - definição dos parâmetros esperados
 func (t *MinhaTool) Description() string {
-    return `
+	return `
 Palavras associadas:
 - minha tool
 - exemplo
- 
+
 → usar ferramenta "minha_tool"
- 
+
+Descrição:
+Coloque a descrição da sua tool
+
 Parâmetros:
 - param1 (string, obrigatório): descrição
-    `
+
+Comportamento:
+- Faz y alguma coisa.
+
+Uso comum:
+- Verificar quando x acontece
+`
 }
- 
+
+// Execute contém a lógica principal da ferramenta.
+// Recebe os parâmetros fornecidos pela LLM e retorna o resultado
+// da execução ou um erro caso algo inválido seja detectado.
 func (t *MinhaTool) Execute(params map[string]interface{}) (any, error) {
-    param1, ok := params["param1"].(string)
-    if !ok || param1 == "" {
-        return nil, fmt.Errorf("param1 é obrigatório")
-    }
-    return fmt.Sprintf("Executado: %s", param1), nil
+	param1, ok := params["param1"].(string)
+	if !ok || param1 == "" {
+		return nil, fmt.Errorf("param1 é obrigatório")
+	}
+
+	return fmt.Sprintf("Executado: %s", param1), nil
 }
 
 ```
