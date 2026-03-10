@@ -330,7 +330,7 @@ func (t *Hello) Execute(params map[string]interface{}) (any, error) {
 ## Fluxo Resumido
 > 1. **Verifique o go.mod**  go mod init + go mod edit -replace + go get simplemcp
 > 2. **Crie a pasta**  simplemcpplugins/meu-plugin/
-> 3. Implemente  plugin.go com Name(), Description(), Execute()
+> 3. **Implemente**  plugin.go com Name(), Description(), Execute()
 > 4. **Registre no init()**  sdk.Register(&SuaTool{})
 > 5. **Gere os imports**  go generate ./... no simplemcp
 > 6. **Compile**  go build ./...
