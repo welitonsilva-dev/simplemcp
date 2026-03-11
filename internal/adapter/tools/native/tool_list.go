@@ -2,7 +2,6 @@ package native
 
 import (
 	"fmt"
-	"strings"
 
 	"simplemcp/internal/adapter/tools"
 )
@@ -12,6 +11,13 @@ func init() {
 }
 
 type ToolList struct{}
+
+// ToolListResult é o output estruturado da tool tool_list.
+type ToolListResult struct {
+	Message string   `json:"message"`
+	Native  []string `json:"native"`
+	Plugins []string `json:"plugins"`
+}
 
 func (t *ToolList) Name() string {
 	return "tool_list"
@@ -44,23 +50,21 @@ func (t *ToolList) Execute(params map[string]interface{}) (any, error) {
 	native := tools.GlobalRegistry().ListByOrigin(tools.OriginNative)
 	plugins := tools.GlobalRegistry().ListByOrigin(tools.OriginPlugin)
 
-	var sb strings.Builder
-
-	sb.WriteString("nativas:\n")
-	if len(native) == 0 {
-		sb.WriteString("  nenhuma\n")
-	}
+	// extrai só os nomes de cada grupo
+	nativeNames := make([]string, 0, len(native))
 	for _, tool := range native {
-		sb.WriteString(fmt.Sprintf("  - %s\n", tool.Name()))
+		nativeNames = append(nativeNames, tool.Name())
 	}
 
-	sb.WriteString("\nplugins:\n")
-	if len(plugins) == 0 {
-		sb.WriteString("  nenhum\n")
-	}
+	pluginNames := make([]string, 0, len(plugins))
 	for _, tool := range plugins {
-		sb.WriteString(fmt.Sprintf("  - %s\n", tool.Name()))
+		pluginNames = append(pluginNames, tool.Name())
 	}
 
-	return sb.String(), nil
+	return ToolListResult{
+		Message: fmt.Sprintf("%d ferramentas disponíveis (%d nativas, %d plugins)",
+			len(native)+len(plugins), len(native), len(plugins)),
+		Native:  nativeNames,
+		Plugins: pluginNames,
+	}, nil
 }
