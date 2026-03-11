@@ -123,7 +123,7 @@ func readPluginsModuleFromReplace(gomod string) string {
 		if strings.HasPrefix(line, "require") {
 			continue
 		}
-		// ex: require github.com/weliton/simplemcpplugins v0.0.0...
+		// ex: require github.com/usuario/simplemcpplugins v0.0.0...
 		if strings.Contains(line, "simplemcpplugins") && !strings.HasPrefix(line, "replace") {
 			fields := strings.Fields(line)
 			if len(fields) >= 2 {

@@ -1,6 +1,6 @@
 package sdk
 
-import "simplemcp/internal/tools"
+import "simplemcp/internal/adapter/tools"
 
 type Tool interface {
 	Name() string
