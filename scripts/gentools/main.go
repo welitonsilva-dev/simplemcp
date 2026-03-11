@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	mainFile     = "cmd/main.go"
-	nativeDir    = "internal/tools/native"
+	mainFile     = "cmd/server/main.go"
+	nativeDir    = "internal/adapter/tools/native"
 	markerNative = "pacotes de ferramentas nativas"
 )
 
@@ -30,7 +30,7 @@ func main() {
 
 	main_ := filepath.Join(r, mainFile)
 	native := filepath.Join(r, nativeDir)
-	gomod  := filepath.Join(r, "go.mod")
+	gomod := filepath.Join(r, "go.mod")
 
 	if _, err := os.Stat(main_); err != nil {
 		fatalf("erro: %s não encontrado.", main_)

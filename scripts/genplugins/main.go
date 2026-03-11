@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	mainFile      = "cmd/main.go"
+	mainFile      = "cmd/server/main.go"
 	markerPlugins = "pacotes de ferramentas externas/plugins"
 )
 

@@ -11,14 +11,12 @@ import (
 	"simplemcp/internal/infra/logger"
 	"simplemcp/internal/infra/server"
 	"simplemcp/internal/usecase/agent"
-
 	// pacotes de ferramentas nativas
-	_ "simplemcp/internal/adapter/tools/native/echo"
 	_ "simplemcp/internal/adapter/tools/native/filesystem"
-
+	_ "simplemcp/internal/adapter/tools/native/echo"
 	// pacotes de ferramentas externas/plugins
-	_ "github.com/weliton/simplemcpplugins/dockercmd"
 	_ "github.com/weliton/simplemcpplugins/hello"
+	_ "github.com/weliton/simplemcpplugins/dockercmd"
 )
 
 func main() {
