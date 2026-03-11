@@ -64,7 +64,7 @@ docker compose up -d
 
 Envie comandos em linguagem natural para o servidor MCP.
 
-**Rota:** `POST http://localhost:8081/v1/chat`
+**Rota:** `POST http://localhost:8081/v1/do`
 
 **Body:**
 ```json

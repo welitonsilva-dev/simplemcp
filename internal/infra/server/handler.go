@@ -19,8 +19,8 @@ func NewHandler(a *agent.AgentUseCase) *Handler {
 	return &Handler{agent: a}
 }
 
-// Chat recebe o prompt do usuário e retorna o resultado da execução.
-func (h *Handler) Chat(w http.ResponseWriter, r *http.Request) {
+// /Do recebe o prompt do usuário e retorna o resultado da execução.
+func (h *Handler) Do(w http.ResponseWriter, r *http.Request) {
 	var msg message.UserMessage
 	if err := json.NewDecoder(r.Body).Decode(&msg); err != nil {
 		logger.Error("handler decode error: %v", err)

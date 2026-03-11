@@ -16,6 +16,7 @@ type Config struct {
 	RateLimitIP         int
 	RateLimitGlobal     int
 	RateLimitWindow     time.Duration
+	RequestTimeout      time.Duration
 	ConfidenceThreshold float64
 }
 
@@ -40,6 +41,11 @@ func Load() *Config {
 		rateLimitWindow = 60
 	}
 
+	requestTimeout, err := strconv.Atoi(getEnv("REQUEST_TIMEOUT", "120"))
+	if err != nil {
+		requestTimeout = 120
+	}
+
 	confidenceThreshold, err := strconv.ParseFloat(getEnv("CONFIDENCE_THRESHOLD", "0.8"), 64)
 	if err != nil {
 		confidenceThreshold = 0.8
@@ -55,6 +61,7 @@ func Load() *Config {
 		RateLimitIP:         rateLimitIP,
 		RateLimitGlobal:     rateLimitGlobal,
 		RateLimitWindow:     time.Duration(rateLimitWindow) * time.Second,
+		RequestTimeout:      time.Duration(requestTimeout) * time.Second,
 		ConfidenceThreshold: confidenceThreshold,
 	}
 }

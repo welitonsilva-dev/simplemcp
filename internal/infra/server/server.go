@@ -13,18 +13,25 @@ type Server struct {
 }
 
 // New cria e configura o servidor com todas as rotas.
-func New(addr, apiKey string, limitIP, limitGlobal int, window time.Duration, agentUseCase *agent.AgentUseCase) *Server {
+func New(addr, apiKey string, limitIP, limitGlobal int, window, timeout time.Duration, agentUseCase *agent.AgentUseCase) *Server {
 	h := NewHandler(agentUseCase)
 	limiter := newRateLimiter(limitIP, limitGlobal, window)
 
 	mux := http.NewServeMux()
 
-	// /health — livre, sem autenticação e sem rate limit
-	mux.HandleFunc("/health", rateLimitMiddleware(limiter, h.Health))
+	// /health — sem autenticação, mas com rate limit e timeout para evitar abusos
+	// ordem: rateLimit → timeout → handler
+	mux.HandleFunc("/health",
+		rateLimitMiddleware(limiter,
+			timeoutMiddleware(timeout, h.Health),
+		))
 
-	// /v1/chat — protegido por API Key + rate limit
-	mux.HandleFunc("/v1/chat", apiKeyMiddleware(apiKey,
-		rateLimitMiddleware(limiter, h.Chat),
+	// /v1/do — pipeline completo de middlewares
+	// ordem: apiKey → rateLimit → timeout → handler
+	mux.HandleFunc("/v1/do", apiKeyMiddleware(apiKey,
+		rateLimitMiddleware(limiter,
+			timeoutMiddleware(timeout, h.Do),
+		),
 	))
 
 	return &Server{
