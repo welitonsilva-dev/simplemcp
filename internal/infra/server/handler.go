@@ -21,6 +21,11 @@ func NewHandler(a *agent.AgentUseCase) *Handler {
 
 // /Do recebe o prompt do usuário e retorna o resultado da execução.
 func (h *Handler) Do(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	var msg message.UserMessage
 	if err := json.NewDecoder(r.Body).Decode(&msg); err != nil {
 		logger.Error("handler decode error: %v", err)
@@ -41,6 +46,11 @@ func (h *Handler) Do(w http.ResponseWriter, r *http.Request) {
 
 // Health retorna o status do servidor.
 func (h *Handler) Health(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(`{"status":"ok"}`))
