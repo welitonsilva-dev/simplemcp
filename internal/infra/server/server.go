@@ -2,6 +2,7 @@ package server
 
 import (
 	"net/http"
+	"time"
 
 	"simplemcp/internal/usecase/agent"
 )
@@ -12,14 +13,19 @@ type Server struct {
 }
 
 // New cria e configura o servidor com todas as rotas.
-func New(addr string, apiKey string, agentUseCase *agent.AgentUseCase) *Server {
+func New(addr, apiKey string, limitIP, limitGlobal int, window time.Duration, agentUseCase *agent.AgentUseCase) *Server {
 	h := NewHandler(agentUseCase)
+	limiter := newRateLimiter(limitIP, limitGlobal, window)
 
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/health", h.Health)
+	// /health — livre, sem autenticação e sem rate limit
+	mux.HandleFunc("/health", rateLimitMiddleware(limiter, h.Health))
 
-	mux.HandleFunc("/v1/chat", apiKeyMiddleware(apiKey, h.Chat))
+	// /v1/chat — protegido por API Key + rate limit
+	mux.HandleFunc("/v1/chat", apiKeyMiddleware(apiKey,
+		rateLimitMiddleware(limiter, h.Chat),
+	))
 
 	return &Server{
 		httpServer: &http.Server{

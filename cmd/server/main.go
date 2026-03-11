@@ -52,7 +52,7 @@ func main() {
 	agentUseCase := agent.New(pipe, llmClient, registry)
 
 	logger.Info("🚀 configurando servidor HTTP")
-	srv := server.New(cfg.Addr, cfg.APIKey, agentUseCase)
+	srv := server.New(cfg.Addr, cfg.APIKey, cfg.RateLimitIP, cfg.RateLimitGlobal, cfg.RateLimitWindow, agentUseCase)
 
 	logger.Info("🚀 MCP Server running on %s", cfg.Addr)
 	if err := srv.Start(); err != nil {
