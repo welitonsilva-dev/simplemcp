@@ -6,7 +6,8 @@ import (
 )
 
 type Config struct {
-	Address        string
+	Addr           string
+	APIKey         string
 	Provider       string
 	Model          string
 	OllamaURL      string
@@ -20,7 +21,8 @@ func Load() *Config {
 	}
 
 	return &Config{
-		Address:        getEnv("SERVER_ADDR", ":8081"),
+		Addr:           getEnv("SERVER_ADDR", ":8081"),
+		APIKey:         getEnv("API_KEY", ""),
 		Provider:       getEnv("LLM_PROVIDER", "ollama"),
 		Model:          getEnv("LLM_MODEL", "qwen2.5:7b"),
 		OllamaURL:      getEnv("OLLAMA_URL", "http://ollama:11434"),

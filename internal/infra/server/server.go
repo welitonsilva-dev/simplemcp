@@ -12,12 +12,14 @@ type Server struct {
 }
 
 // New cria e configura o servidor com todas as rotas.
-func New(addr string, agentUseCase *agent.AgentUseCase) *Server {
+func New(addr string, apiKey string, agentUseCase *agent.AgentUseCase) *Server {
 	h := NewHandler(agentUseCase)
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/v1/chat", h.Chat)
+
 	mux.HandleFunc("/health", h.Health)
+
+	mux.HandleFunc("/v1/chat", apiKeyMiddleware(apiKey, h.Chat))
 
 	return &Server{
 		httpServer: &http.Server{
