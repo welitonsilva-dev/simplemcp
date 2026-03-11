@@ -7,15 +7,16 @@ import (
 )
 
 type Config struct {
-	Addr            string
-	APIKey          string
-	Provider        string
-	Model           string
-	OllamaURL       string
-	InputMaxLength  int
-	RateLimitIP     int
-	RateLimitGlobal int
-	RateLimitWindow time.Duration
+	Addr                string
+	APIKey              string
+	Provider            string
+	Model               string
+	OllamaURL           string
+	InputMaxLength      int
+	RateLimitIP         int
+	RateLimitGlobal     int
+	RateLimitWindow     time.Duration
+	ConfidenceThreshold float64
 }
 
 func Load() *Config {
@@ -39,16 +40,22 @@ func Load() *Config {
 		rateLimitWindow = 60
 	}
 
+	confidenceThreshold, err := strconv.ParseFloat(getEnv("CONFIDENCE_THRESHOLD", "0.8"), 64)
+	if err != nil {
+		confidenceThreshold = 0.8
+	}
+
 	return &Config{
-		Addr:            getEnv("SERVER_ADDR", ":8081"),
-		APIKey:          getEnv("API_KEY", ""),
-		Provider:        getEnv("LLM_PROVIDER", "ollama"),
-		Model:           getEnv("LLM_MODEL", "qwen2.5:7b"),
-		OllamaURL:       getEnv("OLLAMA_URL", "http://ollama:11434"),
-		InputMaxLength:  inputMaxLength,
-		RateLimitIP:     rateLimitIP,
-		RateLimitGlobal: rateLimitGlobal,
-		RateLimitWindow: time.Duration(rateLimitWindow) * time.Second,
+		Addr:                getEnv("SERVER_ADDR", ":8081"),
+		APIKey:              getEnv("API_KEY", ""),
+		Provider:            getEnv("LLM_PROVIDER", "ollama"),
+		Model:               getEnv("LLM_MODEL", "qwen2.5:7b"),
+		OllamaURL:           getEnv("OLLAMA_URL", "http://ollama:11434"),
+		InputMaxLength:      inputMaxLength,
+		RateLimitIP:         rateLimitIP,
+		RateLimitGlobal:     rateLimitGlobal,
+		RateLimitWindow:     time.Duration(rateLimitWindow) * time.Second,
+		ConfidenceThreshold: confidenceThreshold,
 	}
 }
 

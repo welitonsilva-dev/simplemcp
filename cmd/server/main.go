@@ -49,7 +49,7 @@ func main() {
 	registry := tools.GlobalRegistry()
 
 	logger.Info("🚀 configurando agente")
-	agentUseCase := agent.New(pipe, llmClient, registry)
+	agentUseCase := agent.New(pipe, llmClient, registry, cfg.ConfidenceThreshold)
 
 	logger.Info("🚀 configurando servidor HTTP")
 	srv := server.New(cfg.Addr, cfg.APIKey, cfg.RateLimitIP, cfg.RateLimitGlobal, cfg.RateLimitWindow, agentUseCase)

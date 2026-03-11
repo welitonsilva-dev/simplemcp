@@ -10,20 +10,30 @@ import (
 	"simplemcp/internal/infra/logger"
 )
 
+// destructiveTools lista as tools que exigem confidence mínima para executar.
+// futuro via banco de dados ou configuração dinâmica, mas por ora hardcoded aqui.
+var destructiveTools = map[string]bool{
+	"fs_rm":    true,
+	"fs_rmdir": true,
+	"fs_rmrf":  true,
+}
+
 // AgentUseCase orquestra o fluxo completo:
-// pipeline → plan → execute → respond
+// pipeline → plan → confidence guard → execute → respond
 type AgentUseCase struct {
-	pipeline *pipeline.Pipeline
-	llm      *llm.Client
-	registry tool.ToolRegistry
+	pipeline            *pipeline.Pipeline
+	llm                 *llm.Client
+	registry            tool.ToolRegistry
+	confidenceThreshold float64
 }
 
 // New cria um AgentUseCase com todas as dependências injetadas.
-func New(p *pipeline.Pipeline, l *llm.Client, r tool.ToolRegistry) *AgentUseCase {
+func New(p *pipeline.Pipeline, l *llm.Client, r tool.ToolRegistry, confidenceThreshold float64) *AgentUseCase {
 	return &AgentUseCase{
-		pipeline: p,
-		llm:      l,
-		registry: r,
+		pipeline:            p,
+		llm:                 l,
+		registry:            r,
+		confidenceThreshold: confidenceThreshold,
 	}
 }
 
@@ -56,6 +66,26 @@ func (a *AgentUseCase) Execute(msg message.UserMessage) (*message.AgentResponse,
 	// 4. executa cada step do plano
 	var results []message.StepResult
 	for i, step := range plan.Steps {
+		// confidence guard — bloqueia tools destrutivas se LLM estiver insegura
+		if destructiveTools[step.Tool] && plan.Confidence < a.confidenceThreshold {
+			logger.Error("confidence guard: tool '%s' bloqueada (confidence %.2f < %.2f)",
+				step.Tool, plan.Confidence, a.confidenceThreshold)
+			results = append(results, message.StepResult{
+				Tool: step.Tool,
+				Output: map[string]any{
+					"requires_confirmation": true,
+					"tool":                  step.Tool,
+					"confidence":            plan.Confidence,
+					"message": fmt.Sprintf(
+						"comando bloqueado: não entendi com clareza suficiente (%.0f%% de certeza). "+
+							"Seja mais específico ou confirme explicitamente a ação.",
+						plan.Confidence*100,
+					),
+				},
+			})
+			continue
+		}
+
 		t, exists := a.registry.Get(step.Tool)
 		if !exists {
 			logger.Error("tool '%s' não encontrada (step %d)", step.Tool, i+1)
