@@ -1,4 +1,4 @@
-# SimpleMCP — Guia de Setup e Uso
+# humancli-server — Guia de Setup e Uso
 
 ## Sumário
 
@@ -15,7 +15,7 @@
 ### 1. Limpar o ambiente Docker
 
 ```bash
-cd simplemcp/docker && sh docker-clean.sh
+cd humancli-server/docker && sh docker-clean.sh
 ```
 
 ### 2. Voltar para a raiz do projeto

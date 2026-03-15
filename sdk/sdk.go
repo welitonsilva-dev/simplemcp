@@ -1,6 +1,6 @@
 package sdk
 
-import "simplemcp/internal/adapter/tools"
+import "humancli-server/internal/adapter/tools"
 
 type Tool interface {
 	Name() string

@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"simplemcp/internal/usecase/agent"
+	"humancli-server/internal/usecase/agent"
 )
 
 // Server encapsula o servidor HTTP.

@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"simplemcp/internal/domain/message"
-	"simplemcp/internal/infra/logger"
-	"simplemcp/internal/usecase/agent"
+	"humancli-server/internal/domain/message"
+	"humancli-server/internal/infra/logger"
+	"humancli-server/internal/usecase/agent"
 )
 
 // Handler processa as requisições HTTP e delega ao usecase.

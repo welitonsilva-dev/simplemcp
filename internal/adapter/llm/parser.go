@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"strings"
 
-	"simplemcp/internal/domain/plan"
+	"humancli-server/internal/domain/plan"
 )
 
 // Plan monta o prompt, envia ao Ollama e parseia a resposta para um ExecutionPlan.

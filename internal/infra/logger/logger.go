@@ -32,7 +32,7 @@ func Init(logDir string) error {
 	}
 
 	logFile, err := os.OpenFile(
-		filepath.Join(logDir, "simplemcp.log"),
+		filepath.Join(logDir, "humancli-server.log"),
 		os.O_APPEND|os.O_CREATE|os.O_WRONLY,
 		0644,
 	)

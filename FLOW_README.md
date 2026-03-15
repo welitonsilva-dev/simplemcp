@@ -1,4 +1,4 @@
-# 🔁 Fluxo de Execução MCP + Ollama
+# 🔁 Fluxo de Execução — humancli-server + Ollama
 
 ```text
                 ┌──────────────────────────┐
@@ -42,8 +42,8 @@
         │                      │  │                      │
         │ continua execução    │  │ ollama pull MODEL    │
         └───────────┬──────────┘  └───────────┬──────────┘
-                    │                        │
-                    └──────────────┬─────────┘
+                    │                         │
+                    └──────────────┬──────────┘
                                    ▼
                 ┌──────────────────────────┐
                 │ Ollama pronto            │
@@ -52,20 +52,28 @@
                                │
                                ▼
                 ┌──────────────────────────┐
-                │ Inicia MCP Server        │
+                │ Inicia humancli-server   │
                 │ (Handler HTTP)           │
                 └──────────────┬───────────┘
                                │
                                ▼
                 ┌──────────────────────────┐
-                │ Usuário envia prompt     │
-                │ via HTTP request         │
+                │ humancli-client envia    │
+                │ prompt em linguagem      │
+                │ natural via HTTP         │
                 └──────────────┬───────────┘
                                │
                                ▼
                 ┌──────────────────────────┐
-                │ Planner cria plano       │
-                │ de execução detalhado    │
+                │ Pipeline limpa e         │
+                │ normaliza o input        │
+                └──────────────┬───────────┘
+                               │
+                               ▼
+                ┌──────────────────────────┐
+                │ LLM (Ollama) interpreta  │
+                │ e cria plano de          │
+                │ execução detalhado       │
                 └──────────────┬───────────┘
                                │
                                ▼
@@ -76,25 +84,20 @@
                                │
                                ▼
                 ┌──────────────────────────┐
-                │ Consulta LLM (Ollama)   │
-                │ para validação ou       │
-                │ expansão do plano       │
-                └──────────────┬───────────┘
-                               │
-                               ▼
-                ┌──────────────────────────┐
                 │ Executa Tools (nativas   │
-                │ / plugins) conforme plano│
+                │ ou plugins) conforme     │
+                │ plano gerado             │
                 └──────────────┬───────────┘
                                │
                                ▼
                 ┌──────────────────────────┐
                 │ Agent consolida          │
-                │ resultados e resposta    │
+                │ resultados               │
                 └──────────────┬───────────┘
                                │
                                ▼
                 ┌──────────────────────────┐
-                │ MCP Server retorna       │
-                │ resposta final ao usuário│
+                │ humancli-server retorna  │
+                │ resposta ao client       │
                 └──────────────────────────┘
+```

@@ -20,7 +20,7 @@ const (
 // root retorna a raiz do projeto independente de onde o go generate foi chamado
 func root() string {
 	_, file, _, _ := runtime.Caller(0)
-	// file = .../simplemcp/cmd/gentools/main.go
+	// file = .../humancli-server/cmd/gentools/main.go
 	// sobe dois níveis: gentools/ → cmd/ → raiz
 	return filepath.Join(filepath.Dir(file), "..", "..")
 }

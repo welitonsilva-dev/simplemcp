@@ -7,10 +7,15 @@ import (
 )
 
 type Config struct {
-	Addr                string
-	APIKey              string
-	Provider            string
-	Model               string
+	Addr     string
+	APIKey   string
+	Provider string
+	Model    string
+	// LLMAPIKey é a chave de API para provedores externos (OpenAI, Anthropic, Groq, etc.)
+	LLMAPIKey string
+	// LLMBaseURL permite apontar para APIs OpenAI-compatíveis (Groq, OpenRouter, LM Studio, etc.)
+	LLMBaseURL string
+	// OllamaURL é usado apenas quando Provider=ollama
 	OllamaURL           string
 	InputMaxLength      int
 	RateLimitIP         int
@@ -54,8 +59,10 @@ func Load() *Config {
 	return &Config{
 		Addr:                getEnv("SERVER_ADDR", ":8081"),
 		APIKey:              getEnv("API_KEY", ""),
-		Provider:            getEnv("LLM_PROVIDER", "ollama"),
-		Model:               getEnv("LLM_MODEL", "qwen2.5:7b"),
+		Provider:            getEnv("HUMANCLI_PROVIDER", "ollama"),
+		Model:               getEnv("HUMANCLI_MODEL", "qwen2.5:7b"),
+		LLMAPIKey:           getEnv("LLM_API_KEY", ""),
+		LLMBaseURL:          getEnv("LLM_BASE_URL", ""),
 		OllamaURL:           getEnv("OLLAMA_URL", "http://ollama:11434"),
 		InputMaxLength:      inputMaxLength,
 		RateLimitIP:         rateLimitIP,

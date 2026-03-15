@@ -26,7 +26,7 @@ func main() {
 
 	main_ := filepath.Join(r, mainFile)
 	gomod := filepath.Join(r, "go.mod")
-	pluginsDir := filepath.Join(r, "..", "simplemcpplugins")
+	pluginsDir := filepath.Join(r, "..", "humancli-plugins")
 
 	if _, err := os.Stat(main_); err != nil {
 		fatalf("erro: %s não encontrado.", main_)
@@ -39,11 +39,11 @@ func main() {
 
 	module := readPluginsModule(filepath.Join(pluginsDir, "go.mod"))
 	if module == "" {
-		// fallback: tenta ler do go.mod do simplemcp via replace
+		// fallback: tenta ler do go.mod do humancli-server via replace
 		module = readPluginsModuleFromReplace(gomod)
 	}
 	if module == "" {
-		fatalf("erro: não foi possível detectar o module name do simplemcpplugins.")
+		fatalf("erro: não foi possível detectar o module name do humancli-plugins.")
 	}
 
 	lines, err := readLines(main_)
@@ -104,12 +104,12 @@ func containsLine(lines []string, substr string) bool {
 	return false
 }
 
-// readPluginsModule lê o module name do go.mod do simplemcpplugins
+// readPluginsModule lê o module name do go.mod do humancli-plugins
 func readPluginsModule(gomod string) string {
 	return readModuleName(gomod)
 }
 
-// readPluginsModuleFromReplace lê o module name do replace no go.mod do simplemcp
+// readPluginsModuleFromReplace lê o module name do replace no go.mod do humancli-server
 func readPluginsModuleFromReplace(gomod string) string {
 	f, err := os.Open(gomod)
 	if err != nil {
@@ -123,8 +123,8 @@ func readPluginsModuleFromReplace(gomod string) string {
 		if strings.HasPrefix(line, "require") {
 			continue
 		}
-		// ex: require github.com/usuario/simplemcpplugins v0.0.0...
-		if strings.Contains(line, "simplemcpplugins") && !strings.HasPrefix(line, "replace") {
+		// ex: require github.com/usuario/humancli-plugins v0.0.0...
+		if strings.Contains(line, "humancli-plugins") && !strings.HasPrefix(line, "replace") {
 			fields := strings.Fields(line)
 			if len(fields) >= 2 {
 				return fields[len(fields)-2]

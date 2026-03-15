@@ -3,7 +3,7 @@ package native
 import (
 	"fmt"
 
-	"simplemcp/internal/adapter/tools"
+	"humancli-server/internal/adapter/tools"
 )
 
 func init() {

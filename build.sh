@@ -2,10 +2,10 @@
 
 cd "$(dirname "$0")/.."
 
-if [ -d "simplemcpplugins" ]; then
-  echo "simplemcpplugins encontrado, build completo"
-  docker build -f simplemcp/Dockerfile .
+if [ -d "humancli-plugins" ]; then
+  echo "humancli-plugins encontrado, build completo"
+  docker build -f humancli-server/Dockerfile .
 else
-  echo "simplemcpplugins não encontrado, build só simplemcp"
-  docker build -f simplemcp/Dockerfile.standalone simplemcp/
+  echo "humancli-plugins não encontrado, build só humancli-server"
+  docker build -f humancli-server/Dockerfile.standalone humancli-server/
 fi 

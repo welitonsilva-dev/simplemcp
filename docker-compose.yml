@@ -16,7 +16,7 @@ services:
   mcp-server:
     build:
       context: ..
-      dockerfile: simplemcp/Dockerfile
+      dockerfile: humancli-server/Dockerfile
     container_name: mcp-server
     ports:
       - "8081:8081"

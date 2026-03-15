@@ -1,8 +1,10 @@
-.
+
+```
 ├── Dockerfile
 ├── Dockerfile.standalone
 ├── FLOW_README.md
 ├── PLUGIN_README.md
+├── PROJECT_STRUCT_README.md
 ├── README.md
 ├── RUN_README.md
 ├── build.sh
@@ -10,8 +12,9 @@
 ├── cli.sh
 ├── cmd
 │   ├── logs
-│   │   └── simplemcp.log
-│   └── main.go // Excuta o servidor para o usuário
+│   │   └── humancli-server.log
+│   └── server
+│       └── main.go
 ├── docker
 │   ├── docker-clean.md
 │   ├── docker-clean.sh
@@ -23,51 +26,62 @@
 ├── generate.go
 ├── go.mod
 ├── internal
-│   ├── agent
-│   │   ├── agent.go
-│   │   └── planner.go
-│   ├── config
-│   │   └── config.go
-│   ├── llm
-│   │   ├── Client.go
-│   │   └── prompt.go
-│   ├── logger
-│   │   └── logger.go
-│   ├── pipeline
-│   │   ├── cleaner.go
-│   │   ├── optimizer.go
-│   │   ├── reduce.go
-│   │   └── sanitizer.go
-│   ├── protocol
-│   │   ├── request.go
-│   │   └── response.go
-│   ├── server
-│   │   └── handler.go
-│   └── tools
-│       ├── native
-│       │   ├── filesystem
-│       │   │   ├── fs_cd.go
-│       │   │   ├── fs_list.go
-│       │   │   ├── fs_mkdir.go
-│       │   │   ├── fs_rm.go
-│       │   │   ├── fs_rmdir.go
-│       │   │   ├── fs_rmrf.go
-│       │   │   └── fs_touch.go
-│       │   ├── state.go
-│       │   ├── testinterno
-│       │   │   ├── double_echo.go
-│       │   │   └── echo.go
-│       │   └── tool_list.go
-│       ├── registry.go
-│       └── tool.go
+│   ├── adapter
+│   │   ├── llm
+│   │   │   ├── Client.go
+│   │   │   ├── parser.go
+│   │   │   └── prompt.go
+│   │   ├── pipeline
+│   │   │   ├── cleaner.go
+│   │   │   ├── normalize.go
+│   │   │   ├── optimizer.go
+│   │   │   ├── pipeline.go
+│   │   │   ├── sanitizer.go
+│   │   │   └── validator.go
+│   │   └── tools
+│   │       ├── native
+│   │       │   ├── echo
+│   │       │   │   ├── double_echo.go
+│   │       │   │   └── echo.go
+│   │       │   ├── filesystem
+│   │       │   │   ├── cd.go
+│   │       │   │   ├── list.go
+│   │       │   │   ├── mkdir.go
+│   │       │   │   ├── mr.go
+│   │       │   │   ├── rmdir.go
+│   │       │   │   └── touch.go
+│   │       │   ├── state.go
+│   │       │   └── tool_list.go
+│   │       └── registry.go
+│   ├── domain
+│   │   ├── message
+│   │   │   └── message.go
+│   │   ├── plan
+│   │   │   └── plan.go
+│   │   └── tool
+│   │       ├── registry.go
+│   │       └── tool.go
+│   ├── infra
+│   │   ├── config
+│   │   │   └── config.go
+│   │   ├── logger
+│   │   │   └── logger.go
+│   │   └── server
+│   │       ├── handler.go
+│   │       ├── middleware.go
+│   │       ├── ratelimit.go
+│   │       ├── server.go
+│   │       └── timeout.go
+│   └── usecase
+│       └── agent
+│           └── agent.go
 ├── logs
-│   └── simplemcp.log
+│   └── humancli-server.log
 ├── scripts
 │   ├── genplugins
 │   │   └── main.go
 │   └── gentools
 │       └── main.go
-├── sdk
-│   └── sdk.go
-└── utils
-    └── json.go
+└── sdk
+    └── sdk.go
+```

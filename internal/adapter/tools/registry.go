@@ -7,7 +7,7 @@ import (
 	"strings"
 	"sync"
 
-	"simplemcp/internal/domain/tool"
+	"humancli-server/internal/domain/tool"
 )
 
 // ToolOrigin identifica a origem de uma tool registrada.

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"simplemcp/internal/infra/logger"
+	"humancli-server/internal/infra/logger"
 )
 
 // Client é o adaptador HTTP para o servidor Ollama.

@@ -3,11 +3,11 @@ package agent
 import (
 	"fmt"
 
-	"simplemcp/internal/adapter/llm"
-	"simplemcp/internal/adapter/pipeline"
-	"simplemcp/internal/domain/message"
-	"simplemcp/internal/domain/tool"
-	"simplemcp/internal/infra/logger"
+	"humancli-server/internal/adapter/llm"
+	"humancli-server/internal/adapter/pipeline"
+	"humancli-server/internal/domain/message"
+	"humancli-server/internal/domain/tool"
+	"humancli-server/internal/infra/logger"
 )
 
 // destructiveTools lista as tools que exigem confidence mínima para executar.

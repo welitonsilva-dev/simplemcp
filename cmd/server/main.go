@@ -4,21 +4,21 @@ import (
 	"log"
 	"os"
 
-	"simplemcp/internal/adapter/llm"
-	"simplemcp/internal/adapter/pipeline"
-	"simplemcp/internal/adapter/tools"
-	"simplemcp/internal/infra/config"
-	"simplemcp/internal/infra/logger"
-	"simplemcp/internal/infra/server"
-	"simplemcp/internal/usecase/agent"
+	"humancli-server/internal/adapter/llm"
+	"humancli-server/internal/adapter/pipeline"
+	"humancli-server/internal/adapter/tools"
+	"humancli-server/internal/infra/config"
+	"humancli-server/internal/infra/logger"
+	"humancli-server/internal/infra/server"
+	"humancli-server/internal/usecase/agent"
 
 	// pacotes de ferramentas nativas
-	_ "simplemcp/internal/adapter/tools/native/echo"
-	_ "simplemcp/internal/adapter/tools/native/filesystem"
+	_ "humancli-server/internal/adapter/tools/native/echo"
+	_ "humancli-server/internal/adapter/tools/native/filesystem"
 
 	// pacotes de ferramentas externas/plugins
-	_ "github.com/weliton/simplemcpplugins/dockercmd"
-	_ "github.com/weliton/simplemcpplugins/hello"
+	_ "github.com/weliton/humancli-plugins/dockercmd"
+	_ "github.com/weliton/humancli-plugins/hello"
 )
 
 func main() {

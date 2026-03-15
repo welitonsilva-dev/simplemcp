@@ -1,6 +1,6 @@
 package native
 
-import "simplemcp/internal/adapter/tools"
+import "humancli-server/internal/adapter/tools"
 
 func init() {
 	tools.GlobalRegistry().Register(&Echo{})

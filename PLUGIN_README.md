@@ -1,93 +1,97 @@
-# simplemcp
+# humancli-server
 ***Guia de Criação de Plugins Externos***
 
 > Go 1.21+	Windows · Linux · macOS	SDK público
 
+---
 
 ## Visão Geral
-O simplemcp suporta extensão via plugins externos. Um plugin é um módulo Go independente que implementa a interface sdk.Tool e registra suas tools no simplemcp sem que você precise modificar o código principal.
+
+O humancli-server suporta extensão via plugins externos. Um plugin é um módulo Go independente que implementa a interface `sdk.Tool` e registra suas tools no servidor sem que você precise modificar o código principal.
+
+Os plugins não se limitam a comandos de sistema — você pode criar automações, integrações com serviços externos, comandos personalizados ou qualquer ferramenta que sua imaginação permitir.
 
 A arquitetura é composta por dois projetos separados:
 
-> | Projeto |Responsabilidade| 
+> | Projeto | Responsabilidade |
 > | ------------ | ------------ |
-> | simplemcp  | Projeto principal. Expõe o SDK público e orquestra as tools. [SAIBA MAIS](./README.md)  |
-> |simplemcpplugins| Repositório de plugins. Cada subpasta é uma tool independente. [REPOSITÓRIO](https://github.com/welitonsilva-dev/simplemcpplugins) |
+> | humancli-server | Projeto principal. Expõe o SDK público e orquestra as tools. [SAIBA MAIS](./README.md) |
+> | humancli-plugins | Repositório de plugins. Cada subpasta é uma tool independente. [REPOSITÓRIO](https://github.com/welitonsilva-dev/simplemcpplugins) |
 
 ---
 
 ## Pré-requisitos
+
 Antes de criar seu plugin, verifique que você tem:
 
-> - Go 1.25.7 ou superior instalado
-> - Ambos os projetos clonados lado a lado: simplemcp/  e  simplemcpplugins/
-> - Acesso de escrita ao repositório simplemcpplugins
+> - Go 1.21 ou superior instalado
+> - Ambos os projetos clonados lado a lado: `humancli-server/` e `humancli-plugins/`
+> - Acesso de escrita ao repositório humancli-plugins
+
 ```bash
 💡  Estrutura esperada de pastas
-projetos/   
-├── simplemcp/   
-└─── simplemcpplugins/         
-		└── meu_plugin/  
-			 └── plugin.go
+projetos/
+├── humancli-server/
+└── humancli-plugins/
+        └── meu_plugin/
+             └── plugin.go
 ```
+
 ---
 
 ## Passo a Passo
 
-> **1	Verifique se o simplemcpplugins já tem go.mod**
+> **1	Verifique se o humancli-plugins já tem go.mod**
 
-O projeto simplemcpplugins precisa ter um go.mod para que o Go reconheça os plugins como módulos. Verifique:
+O projeto humancli-plugins precisa ter um go.mod para que o Go reconheça os plugins como módulos. Verifique:
 
 ```bash
-cd ~/document/projetos/simplemcpplugins
+cd ~/projetos/humancli-plugins
 cat go.mod
-
 ```
+
 Se o arquivo existir, o conteúdo esperado é:
 
-```bash
-module github.com/weliton/simplemcpplugins
- 
-go 1.21
- 
-require simplemcp v0.0.0-00010101000000-000000000000
- 
-replace simplemcp => ../simplemcp
-
 ```
+module github.com/SEU_USUARIO/humancli-plugins
+
+go 1.21
+
+require humancli-server v0.0.0-00010101000000-000000000000
+
+replace humancli-server => ../humancli-server
+```
+
 > ⚠️  **go.mod não existe?
 Se o arquivo não existir, inicialize o módulo com os comandos abaixo antes de continuar.**
 
 ```bash
-cd ~/document/projetos/simplemcpplugins
- 
+cd ~/projetos/humancli-plugins
+
 # 1. Inicializa o módulo
+go mod init github.com/SEU_USUARIO/humancli-plugins
 
-go mod init github.com/SEU_USUARIO/simplemcpplugins
- 
-# 2. Aponta para o simplemcp local
-go mod edit -replace simplemcp=../simplemcp
- 
+# 2. Aponta para o humancli-server local
+go mod edit -replace humancli-server=../humancli-server
+
 # 3. Adiciona a dependência
-go get simplemcp
-
+go get humancli-server
 ```
-> 💡  **Sobre o nome do módulo
-Use github.com/SEU_USUARIO/simplemcpplugins substituindo SEU_USUARIO pelo seu usuário do GitHub. Este nome é o que outros usarão para importar seus plugins**
+
+> 💡  **Sobre o nome do módulo:
+Use `github.com/SEU_USUARIO/humancli-plugins` substituindo SEU_USUARIO pelo seu usuário do GitHub.**
 
 ---
 
+> **2	Crie a pasta do plugin dentro de humancli-plugins**
 
-> **2	Crie a pasta do plugin dentro de simplemcpplugins**
-
-
-Cada plugin é uma subpasta dentro do projeto simplemcpplugins. O nome da pasta será o nome do pacote Go.
+Cada plugin é uma subpasta dentro do projeto humancli-plugins. O nome da pasta será o nome do pacote Go.
 
 ```bash
-cd ~/document/projetos/simplemcpplugins
+cd ~/projetos/humancli-plugins
 mkdir meu_plugin
-
 ```
+
 ---
 
 > **3	Crie o arquivo plugin.go**
@@ -95,24 +99,24 @@ mkdir meu_plugin
 Dentro da pasta criada, crie o arquivo principal do plugin. O arquivo deve:
 
 > - Declarar o package com o mesmo nome da pasta
-> - Importar  **simplemcp/sdk** 
-> - Registrar a tool no  **init()**  com  **sdk.Register(&SuaTool{})** 
-> - Implementar os três métodos:  **Name() ,  Description() ,  Execute() **
+> - Importar `humancli-server/sdk`
+> - Registrar a tool no `init()` com `sdk.Register(&SuaTool{})`
+> - Implementar os três métodos: `Name()`, `Description()`, `Execute()`
 
 ```go
-// simplemcpplugins/meu_plugin/plugin.go
+// humancli-plugins/meu_plugin/plugin.go
 package meuplugin
 
 import (
-	"fmt"
-	"simplemcp/sdk"
+    "fmt"
+    "humancli-server/sdk"
 )
 
 // init é executado automaticamente quando o pacote é carregado.
 // Aqui registramos a tool no SDK para que ela fique disponível
-// para o sistema MCP e possa ser descoberta pela LLM.
+// no servidor e possa ser descoberta pelo LLM.
 func init() {
-	sdk.Register(&MinhaTool{})
+    sdk.Register(&MinhaTool{})
 }
 
 // MinhaTool define a estrutura da ferramenta.
@@ -122,10 +126,10 @@ type MinhaTool struct{}
 // Name retorna o identificador único da tool.
 // Esse nome será utilizado pelo sistema para referenciar a ferramenta.
 func (t *MinhaTool) Name() string {
-	return "minha_tool"
+    return "minha_tool"
 }
 
-// Description fornece o contexto que a LLM utiliza para decidir
+// Description fornece o contexto que o LLM utiliza para decidir
 // quando essa ferramenta deve ser utilizada.
 //
 // É recomendável incluir:
@@ -134,7 +138,7 @@ func (t *MinhaTool) Name() string {
 // - instruções claras de uso
 // - definição dos parâmetros esperados
 func (t *MinhaTool) Description() string {
-	return `
+    return `
 Palavras associadas:
 - minha tool
 - exemplo
@@ -148,63 +152,66 @@ Parâmetros:
 - param1 (string, obrigatório): descrição
 
 Comportamento:
-- Faz y alguma coisa.
+- Faz alguma coisa com param1.
 
 Uso comum:
-- Verificar quando x acontece
+- Quando o usuário pedir x
 `
 }
 
 // Execute contém a lógica principal da ferramenta.
-// Recebe os parâmetros fornecidos pela LLM e retorna o resultado
+// Recebe os parâmetros fornecidos pelo LLM e retorna o resultado
 // da execução ou um erro caso algo inválido seja detectado.
 func (t *MinhaTool) Execute(params map[string]interface{}) (any, error) {
-	param1, ok := params["param1"].(string)
-	if !ok || param1 == "" {
-		return nil, fmt.Errorf("param1 é obrigatório")
-	}
+    param1, ok := params["param1"].(string)
+    if !ok || param1 == "" {
+        return nil, fmt.Errorf("param1 é obrigatório")
+    }
 
-	return fmt.Sprintf("Executado: %s", param1), nil
+    return fmt.Sprintf("Executado: %s", param1), nil
 }
-
 ```
+
 ---
 
-> **4	Rode o go generate no simplemcp**
+> **4	Rode o go generate no humancli-server**
 
-O simplemcp possui um gerador que escaneia automaticamente todas as subpastas de simplemcpplugins e gera o arquivo de imports. Basta rodar:
+O humancli-server possui um gerador que escaneia automaticamente todas as subpastas de humancli-plugins e gera o arquivo de imports. Basta rodar:
 
 ```bash
-cd ~/document/projetos/simplemcp
+cd ~/projetos/humancli-server
 go generate ./...
 ```
 
-O gerador irá criar ou atualizar o arquivo plugins/plugins.go com o import do seu novo plugin:
+O gerador irá criar ou atualizar o arquivo `plugins/plugins.go` com o import do seu novo plugin:
 
 ```go
 // Code generated by go generate. DO NOT EDIT.
 package main
- 
+
 import (
-    _ "github.com/weliton/simplemcpplugins/meu-plugin"
+    _ "github.com/SEU_USUARIO/humancli-plugins/meu_plugin"
 )
 ```
---- 
+
+---
 
 > **5	Recompile e teste**
 
-Com o plugins.go atualizado, recompile o simplemcp:
+Com o plugins.go atualizado, recompile o humancli-server:
 
 ```bash
 go build ./...
-./simplemcp
+./humancli-server
 ```
 
-Se tudo estiver correto, o LLM já reconhece e consegue acionar sua tool pelo nome definido em **Name().**
+Se tudo estiver correto, o LLM já reconhece e consegue acionar sua tool pelo nome definido em `Name()`.
 
+---
 
-Contrato da Interface
-Todo plugin deve implementar a interface sdk.Tool, composta por três métodos obrigatórios:
+## Contrato da Interface
+
+Todo plugin deve implementar a interface `sdk.Tool`, composta por três métodos obrigatórios:
 
 ```go
 type Tool interface {
@@ -214,16 +221,17 @@ type Tool interface {
 }
 ```
 
->| Método  | Retorno  |  Responsabilidade |
+> | Método | Retorno | Responsabilidade |
 > | ------------ | ------------ | ------------ |
-> |  Name() |  string | Nome único da tool. O LLM usa este nome para chamá-la.  |
-> | Description()  |  string |  Instruções para o LLM: quando acionar, quais params aceitar, comportamento esperado. |
-> |  Execute() |  (any, error) |Lógica da tool. Recebe params como map e retorna o resultado ou erro.|
+> | `Name()` | string | Nome único da tool. O LLM usa este nome para chamá-la. |
+> | `Description()` | string | Instruções para o LLM: quando acionar, quais params aceitar, comportamento esperado. |
+> | `Execute()` | (any, error) | Lógica da tool. Recebe params como map e retorna o resultado ou erro. |
 
 ---
 
 ## Boas Práticas na Description()
-> **A Description() é lida diretamente pelo LLM. Uma boa description garante que o modelo saiba exatamente quando e como usar sua tool. Siga esta estrutura:**
+
+> **A `Description()` é lida diretamente pelo LLM. Uma boa description garante que o modelo saiba exatamente quando e como usar sua tool. Siga esta estrutura:**
 
 ```go
 func (t *MinhaTool) Description() string {
@@ -232,27 +240,26 @@ Palavras associadas:
 - palavra chave 1
 - palavra chave 2
 - comando equivalente no terminal
- 
+
 → usar ferramenta "nome_da_tool"
- 
+
 Descrição:
 O que a tool faz em uma linha.
- 
+
 Parâmetros:
 - param1 (string, obrigatório): o que é este parâmetro
 - param2 (bool, opcional): comportamento quando true. Padrão: false
- 
+
 Comportamento:
 - O que acontece em condições normais
 - O que acontece em edge cases
 - Compatibilidade: Windows, Linux, macOS
- 
+
 Uso comum:
 - Cenário de uso 1
 - Cenário de uso 2
 `
 }
-
 ```
 
 **Dicas**
@@ -261,35 +268,33 @@ Uso comum:
 - Descreva o que acontece quando parâmetros obrigatórios são omitidos
 - Mencione explicitamente compatibilidade de SO quando relevante
 
---- 
+---
 
 ## Exemplo Completo — Hello World
+
 Abaixo o exemplo completo de um plugin funcional que exibe uma saudação personalizada:
 
 ```go
-// simplemcpplugins/hello/hello.go
+// humancli-plugins/hello/hello.go
 package hello
- 
+
 import (
     "fmt"
-    "simplemcp/sdk"
+    "humancli-server/sdk"
 )
- 
+
 func init() {
     sdk.Register(&Hello{})
 }
- 
+
 type Hello struct{}
- 
+
 func (t *Hello) Name() string {
     return "hello"
 }
- 
+
 func (t *Hello) Description() string {
     return `
-Prioridade de interpretação:
-
-Saudar usuário ou pessoa
 Palavras associadas:
 - olá
 - hello
@@ -316,7 +321,7 @@ Uso comum:
 - Saudar o usuário pelo nome
 `
 }
- 
+
 func (t *Hello) Execute(params map[string]interface{}) (any, error) {
     name, _ := params["name"].(string)
     if name == "" {
@@ -324,16 +329,15 @@ func (t *Hello) Execute(params map[string]interface{}) (any, error) {
     }
     return fmt.Sprintf("Olá, %s!", name), nil
 }
-
 ```
 
+---
+
 ## Fluxo Resumido
-> 1. **Verifique o go.mod**  go mod init + go mod edit -replace + go get simplemcp
-> 2. **Crie a pasta**  simplemcpplugins/meu-plugin/
-> 3. **Implemente**  plugin.go com Name(), Description(), Execute()
-> 4. **Registre no init()**  sdk.Register(&SuaTool{})
-> 5. **Gere os imports**  go generate ./... no simplemcp
-> 6. **Compile**  go build ./...
 
-
-
+> 1. **Verifique o go.mod** — `go mod init` + `go mod edit -replace` + `go get humancli-server`
+> 2. **Crie a pasta** — `humancli-plugins/meu_plugin/`
+> 3. **Implemente** — `plugin.go` com `Name()`, `Description()`, `Execute()`
+> 4. **Registre no init()** — `sdk.Register(&SuaTool{})`
+> 5. **Gere os imports** — `go generate ./...` no humancli-server
+> 6. **Compile** — `go build ./...`

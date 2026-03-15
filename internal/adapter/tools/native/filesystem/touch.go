@@ -5,9 +5,9 @@ import (
 	"os"
 	"time"
 
-	"simplemcp/internal/adapter/tools"
-	"simplemcp/internal/adapter/tools/native"
-	"simplemcp/internal/infra/logger"
+	"humancli-server/internal/adapter/tools"
+	"humancli-server/internal/adapter/tools/native"
+	"humancli-server/internal/infra/logger"
 )
 
 func init() {
