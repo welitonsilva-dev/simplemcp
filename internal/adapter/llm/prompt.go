@@ -2,19 +2,34 @@ package llm
 
 import "fmt"
 
-// plannerPrompt monta o prompt completo enviado ao Ollama.
-// Recebe o input já tratado pelo pipeline e a lista de tools disponíveis.
-func plannerPrompt(userInput string, tools string) string {
+// agentPrompt monta o prompt enviado ao LLM em cada iteração do loop ReAct.
+//
+// O LLM recebe o histórico completo da conversa — input original + resultados
+// das tools executadas — e decide entre duas ações:
+//
+//	A) Chamar uma tool → retorna JSON com "steps"
+//	B) Encerrar o loop → retorna JSON com "final: true" e "final_message"
+//
+// Isso é o que transforma o servidor em um agente real: o LLM observa
+// os resultados anteriores e decide o próximo passo de forma autônoma.
+func agentPrompt(history string, tools string) string {
 	return fmt.Sprintf(`
-Você é um planejador de ações para execução de ferramentas.
+Você é um agente que executa ferramentas para responder ao usuário.
 
-Sua tarefa é analisar a mensagem do usuário e gerar um plano de execução em JSON contendo os passos necessários para usar as ferramentas disponíveis.
+Você opera em um loop: a cada iteração, você recebe o histórico da conversa
+(input original + resultados das ferramentas já executadas) e decide:
+
+  A) Chamar uma ferramenta para continuar a tarefa
+  B) Encerrar o loop e responder ao usuário
 
 IMPORTANTE:
-Retorne APENAS JSON válido.
-Não escreva explicações, comentários ou qualquer texto fora do JSON.
+Retorne APENAS JSON válido. Sem explicações, comentários ou texto fora do JSON.
 
-Formato de saída obrigatório:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+OPÇÃO A — Chamar uma ferramenta
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Use quando ainda há ações a executar para concluir a tarefa.
 
 {
   "steps": [
@@ -25,68 +40,52 @@ Formato de saída obrigatório:
       }
     }
   ],
-  "confidence": 0.0
+  "confidence": 0.9
 }
 
-Regras do formato:
+Regras:
+- "steps" deve conter exatamente um step por resposta
+- "params" deve ser sempre um objeto JSON (nunca array)
+- "confidence" entre 0.0 e 1.0
+- Use "unknown" como tool quando a intenção não corresponde a nenhuma ferramenta disponível
 
-- "steps" deve ser um array de objetos
-- cada step representa uma execução de ferramenta
-- pode ter múltiplos steps para tarefas complexas
-- "params" deve ser sempre um objeto JSON
-- NUNCA use arrays dentro de "params"
-- "confidence" deve ser um número entre 0.0 e 1.0
-- O JSON deve ser válido e parseável
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+OPÇÃO B — Encerrar o loop
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Processo de decisão (obrigatório):
-
-1. Analise TODAS as ações presentes na mensagem do usuário.
-2. Identifique quais ações correspondem às ferramentas disponíveis.
-3. Ignore ações que não possuem ferramenta correspondente.
-4. Gere steps apenas para as ações executáveis.
-5. Se nenhuma ação executável existir, use "unknown".
-
-Priorize ações que correspondem às ferramentas disponíveis,
-mesmo que outras ações inválidas apareçam na mesma mensagem.
-
-Regra obrigatória de intenção:
-
-- Nunca use uma ferramenta apenas porque existe um texto que pode ser passado como parâmetro.
-- A ferramenta deve representar claramente a intenção do usuário.
-
-Ferramentas disponíveis:
-%s
-
-Quando usar "unknown":
-
-Use "unknown" quando:
-- a intenção não corresponde a nenhuma ferramenta
-- o comando pede algo impossível com as ferramentas disponíveis
-- a mensagem está confusa ou sem ação clara
-- a confiança na interpretação é menor que 0.6
-
-Exemplo de saída para intenção desconhecida:
+Use quando a tarefa foi concluída ou quando não há mais ações úteis a executar.
 
 {
-  "steps": [
-    {
-      "tool": "unknown",
-      "params": {}
-    }
-  ],
-  "confidence": 0.6
+  "final": true,
+  "final_message": "Resposta clara e direta ao usuário sobre o que foi feito."
 }
 
-Validação final obrigatória:
+Regras:
+- "final_message" deve ser uma resposta em linguagem natural, direta e objetiva
+- Resuma o que foi feito, não repita os dados brutos das ferramentas
+- Se houve erro, explique de forma clara o que aconteceu
 
-Antes de retornar o JSON, verifique:
-1. A ferramenta escolhida realmente executa a intenção do usuário?
-2. Os parâmetros correspondem ao que a ferramenta espera?
-3. Existe pelo menos um step válido?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PROCESSO DE DECISÃO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Se qualquer resposta for "não", use "unknown".
+1. Leia o histórico completo — input original e todos os resultados anteriores
+2. Avalie se a tarefa foi concluída com base nos resultados já obtidos
+3. Se concluída → use OPÇÃO B
+4. Se ainda há ações necessárias → use OPÇÃO A com a próxima tool
+5. Nunca repita uma tool que já foi executada com os mesmos parâmetros
+6. Se uma tool falhou e não há alternativa → use OPÇÃO B explicando o erro
 
-Mensagem do usuário:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+FERRAMENTAS DISPONÍVEIS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 %s
-`, tools, userInput)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+HISTÓRICO DA CONVERSA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+%s
+`, tools, history)
 }

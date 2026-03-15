@@ -12,12 +12,11 @@ import (
 	"humancli-server/internal/infra/server"
 	"humancli-server/internal/usecase/agent"
 
-	// pacotes de ferramentas nativas
+	// ferramentas nativas
 	_ "humancli-server/internal/adapter/tools/native/echo"
 	_ "humancli-server/internal/adapter/tools/native/filesystem"
 
-	// pacotes de ferramentas externas/plugins
-	_ "github.com/weliton/humancli-plugins/dockercmd"
+	// plugins externos
 	_ "github.com/weliton/humancli-plugins/hello"
 )
 
@@ -48,13 +47,13 @@ func main() {
 	logger.Info("🚀 configurando registry de tools")
 	registry := tools.GlobalRegistry()
 
-	logger.Info("🚀 configurando agente")
-	agentUseCase := agent.New(pipe, llmClient, registry, cfg.ConfidenceThreshold)
+	logger.Info("🚀 configurando agente (max_iterations=%d)", cfg.MaxIterations)
+	agentUseCase := agent.New(pipe, llmClient, registry, cfg.ConfidenceThreshold, cfg.MaxIterations)
 
 	logger.Info("🚀 configurando servidor HTTP")
 	srv := server.New(cfg.Addr, cfg.APIKey, cfg.RateLimitIP, cfg.RateLimitGlobal, cfg.RateLimitWindow, cfg.RequestTimeout, agentUseCase)
 
-	logger.Info("🚀 MCP Server running on %s", cfg.Addr)
+	logger.Info("🚀 humancli-server rodando em %s", cfg.Addr)
 	if err := srv.Start(); err != nil {
 		logger.Error("fatal: %v", err)
 	}

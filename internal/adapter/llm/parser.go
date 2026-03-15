@@ -9,10 +9,10 @@ import (
 	"humancli-server/internal/domain/plan"
 )
 
-// Plan monta o prompt, envia ao Ollama e parseia a resposta para um ExecutionPlan.
-// É o ponto de entrada público do pacote llm.
-func (c *Client) Plan(userInput, tools string) (*plan.ExecutionPlan, error) {
-	prompt := plannerPrompt(userInput, tools)
+// Plan monta o prompt com o histórico completo, envia ao LLM e parseia a resposta.
+// É chamado em cada iteração do loop ReAct no AgentUseCase.
+func (c *Client) Plan(history, tools string) (*plan.ExecutionPlan, error) {
+	prompt := agentPrompt(history, tools)
 
 	raw, err := c.generate(prompt)
 	if err != nil {
@@ -22,7 +22,8 @@ func (c *Client) Plan(userInput, tools string) (*plan.ExecutionPlan, error) {
 	return parse(raw)
 }
 
-// parse extrai e decodifica o ExecutionPlan do JSON bruto retornado pela LLM.
+// parse extrai e decodifica o ExecutionPlan do JSON bruto retornado pelo LLM.
+// Trata tanto respostas de ação (steps) quanto de encerramento (final).
 func parse(raw string) (*plan.ExecutionPlan, error) {
 	cleaned := cleanJSON(raw)
 
@@ -31,15 +32,24 @@ func parse(raw string) (*plan.ExecutionPlan, error) {
 		return nil, fmt.Errorf("falha ao parsear JSON do plano: %w — raw: %s", err, cleaned)
 	}
 
+	// resposta de encerramento válida: final=true com mensagem
+	if result.Final {
+		if result.FinalMessage == "" {
+			result.FinalMessage = "tarefa concluída"
+		}
+		return &result, nil
+	}
+
+	// resposta de ação: deve ter ao menos um step
 	if len(result.Steps) == 0 {
-		return nil, fmt.Errorf("plano sem steps: %s", cleaned)
+		return nil, fmt.Errorf("plano sem steps e sem final: %s", cleaned)
 	}
 
 	return &result, nil
 }
 
-// cleanJSON extrai JSON válido de uma string com possíveis ruídos da LLM.
-// Absorve a lógica de utils/json.go — responsabilidade do adaptador LLM.
+// cleanJSON extrai JSON válido de uma string com possíveis ruídos do LLM.
+// Remove blocos de código markdown, comentários e texto fora do JSON.
 func cleanJSON(input string) string {
 	input = strings.TrimSpace(input)
 

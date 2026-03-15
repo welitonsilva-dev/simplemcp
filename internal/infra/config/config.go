@@ -7,22 +7,25 @@ import (
 )
 
 type Config struct {
-	Addr     string
-	APIKey   string
-	Provider string
-	Model    string
-	// LLMAPIKey é a chave de API para provedores externos (OpenAI, Anthropic, Groq, etc.)
-	LLMAPIKey string
-	// LLMBaseURL permite apontar para APIs OpenAI-compatíveis (Groq, OpenRouter, LM Studio, etc.)
+	Addr       string
+	APIKey     string
+	Provider   string
+	Model      string
+	LLMAPIKey  string
 	LLMBaseURL string
-	// OllamaURL é usado apenas quando Provider=ollama
-	OllamaURL           string
+	OllamaURL  string
+
 	InputMaxLength      int
 	RateLimitIP         int
 	RateLimitGlobal     int
 	RateLimitWindow     time.Duration
 	RequestTimeout      time.Duration
 	ConfidenceThreshold float64
+
+	// MaxIterations define o limite de ciclos do loop ReAct por requisição.
+	// Evita loops infinitos em cenários onde o LLM não encerra por conta própria.
+	// Padrão: 10
+	MaxIterations int
 }
 
 func Load() *Config {
@@ -56,6 +59,11 @@ func Load() *Config {
 		confidenceThreshold = 0.8
 	}
 
+	maxIterations, err := strconv.Atoi(getEnv("AGENT_MAX_ITERATIONS", "10"))
+	if err != nil {
+		maxIterations = 10
+	}
+
 	return &Config{
 		Addr:                getEnv("SERVER_ADDR", ":8081"),
 		APIKey:              getEnv("API_KEY", ""),
@@ -70,6 +78,7 @@ func Load() *Config {
 		RateLimitWindow:     time.Duration(rateLimitWindow) * time.Second,
 		RequestTimeout:      time.Duration(requestTimeout) * time.Second,
 		ConfidenceThreshold: confidenceThreshold,
+		MaxIterations:       maxIterations,
 	}
 }
 
