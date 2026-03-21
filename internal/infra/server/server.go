@@ -1,57 +1,53 @@
 package server
 
 import (
-	"encoding/json"
 	"net/http"
+	"time"
 
-	"humancli-server/internal/domain/message"
-	"humancli-server/internal/infra/logger"
 	"humancli-server/internal/usecase/agent"
 )
 
-// Handler processa as requisições HTTP e delega ao usecase.
-type Handler struct {
-	agent *agent.AgentUseCase
+// Server encapsula o servidor HTTP.
+type Server struct {
+	httpServer *http.Server
 }
 
-// NewHandler cria um Handler com o usecase injetado.
-func NewHandler(a *agent.AgentUseCase) *Handler {
-	return &Handler{agent: a}
+// New cria e configura o servidor com todas as rotas.
+func New(addr, apiKey string, limitIP, limitGlobal int, window, timeout time.Duration, agentUseCase *agent.AgentUseCase) *Server {
+	h := NewHandler(agentUseCase)
+	limiter := newRateLimiter(limitIP, limitGlobal, window)
+
+	mux := http.NewServeMux()
+
+	// /health — sem autenticação, com rate limit e timeout
+	mux.HandleFunc("/health",
+		rateLimitMiddleware(limiter,
+			timeoutMiddleware(timeout, h.Health),
+		))
+
+	// /v1/do — resposta completa em JSON (sem streaming)
+	// ordem: apiKey → rateLimit → timeout → handler
+	mux.HandleFunc("/v1/do", apiKeyMiddleware(apiKey,
+		rateLimitMiddleware(limiter,
+			timeoutMiddleware(timeout, h.Do),
+		),
+	))
+
+	// /v1/stream — resposta em tempo real via SSE
+	// sem timeout fixo — o loop encerra por conta própria ou por max_iterations
+	mux.HandleFunc("/v1/stream", apiKeyMiddleware(apiKey,
+		rateLimitMiddleware(limiter, h.Stream),
+	))
+
+	return &Server{
+		httpServer: &http.Server{
+			Addr:    addr,
+			Handler: mux,
+		},
+	}
 }
 
-// /Do recebe o prompt do usuário e retorna o resultado da execução.
-func (h *Handler) Do(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	var msg message.UserMessage
-	if err := json.NewDecoder(r.Body).Decode(&msg); err != nil {
-		logger.Error("handler decode error: %v", err)
-		http.Error(w, "invalid body", http.StatusBadRequest)
-		return
-	}
-
-	response, err := h.agent.Execute(msg)
-	if err != nil {
-		logger.Error("agent execute error: %v", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
-}
-
-// Health retorna o status do servidor.
-func (h *Handler) Health(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(`{"status":"ok"}`))
+// Start inicia o servidor HTTP.
+func (s *Server) Start() error {
+	return s.httpServer.ListenAndServe()
 }

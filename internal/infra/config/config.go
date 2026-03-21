@@ -21,36 +21,40 @@ type Config struct {
 	RateLimitWindow     time.Duration
 	RequestTimeout      time.Duration
 	ConfidenceThreshold float64
+	MaxIterations       int
+	SessionTTL          time.Duration
 
-	// MaxIterations define o limite de ciclos do loop ReAct por requisição.
-	// Evita loops infinitos em cenários onde o LLM não encerra por conta própria.
-	// Padrão: 10
-	MaxIterations int
+	// SessionDBPath é o caminho para o arquivo SQLite de sessões.
+	// Quando definido, as sessões sobrevivem a reinicializações do servidor.
+	// Quando vazio, o servidor usa armazenamento em memória (padrão).
+	//
+	// Exemplo: SESSION_DB_PATH=data/sessions.db
+	SessionDBPath string
 }
 
 func Load() *Config {
-	inputMaxLength, err := strconv.Atoi(getEnv("INPUT_MAX_LENGTH", "1000"))
-	if err != nil {
+	inputMaxLength, _ := strconv.Atoi(getEnv("INPUT_MAX_LENGTH", "1000"))
+	if inputMaxLength == 0 {
 		inputMaxLength = 1000
 	}
 
-	rateLimitIP, err := strconv.Atoi(getEnv("RATE_LIMIT_PER_IP", "10"))
-	if err != nil {
+	rateLimitIP, _ := strconv.Atoi(getEnv("RATE_LIMIT_PER_IP", "10"))
+	if rateLimitIP == 0 {
 		rateLimitIP = 10
 	}
 
-	rateLimitGlobal, err := strconv.Atoi(getEnv("RATE_LIMIT_GLOBAL", "50"))
-	if err != nil {
+	rateLimitGlobal, _ := strconv.Atoi(getEnv("RATE_LIMIT_GLOBAL", "50"))
+	if rateLimitGlobal == 0 {
 		rateLimitGlobal = 50
 	}
 
-	rateLimitWindow, err := strconv.Atoi(getEnv("RATE_LIMIT_WINDOW", "60"))
-	if err != nil {
+	rateLimitWindow, _ := strconv.Atoi(getEnv("RATE_LIMIT_WINDOW", "60"))
+	if rateLimitWindow == 0 {
 		rateLimitWindow = 60
 	}
 
-	requestTimeout, err := strconv.Atoi(getEnv("REQUEST_TIMEOUT", "120"))
-	if err != nil {
+	requestTimeout, _ := strconv.Atoi(getEnv("REQUEST_TIMEOUT", "120"))
+	if requestTimeout == 0 {
 		requestTimeout = 120
 	}
 
@@ -59,9 +63,14 @@ func Load() *Config {
 		confidenceThreshold = 0.8
 	}
 
-	maxIterations, err := strconv.Atoi(getEnv("AGENT_MAX_ITERATIONS", "10"))
-	if err != nil {
+	maxIterations, _ := strconv.Atoi(getEnv("AGENT_MAX_ITERATIONS", "10"))
+	if maxIterations == 0 {
 		maxIterations = 10
+	}
+
+	sessionTTLMin, _ := strconv.Atoi(getEnv("SESSION_TTL_MINUTES", "30"))
+	if sessionTTLMin == 0 {
+		sessionTTLMin = 30
 	}
 
 	return &Config{
@@ -79,6 +88,8 @@ func Load() *Config {
 		RequestTimeout:      time.Duration(requestTimeout) * time.Second,
 		ConfidenceThreshold: confidenceThreshold,
 		MaxIterations:       maxIterations,
+		SessionTTL:          time.Duration(sessionTTLMin) * time.Minute,
+		SessionDBPath:       getEnv("SESSION_DB_PATH", ""),
 	}
 }
 

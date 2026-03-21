@@ -13,16 +13,17 @@ services:
     entrypoint: ["/bin/bash", "/entrypoint.sh"]
     restart: unless-stopped
 
-  mcp-server:
+  humancli-server:
     build:
       context: ..
       dockerfile: humancli-server/Dockerfile
-    container_name: mcp-server
+    container_name: humancli-server
     ports:
       - "8081:8081"
     volumes:
-      - ${HOST_ROOT}:/app/host   # disco do host injetado dinamicamente pelo cli.sh ou cli.ps1
-      - ./logs:/app/logs  # ← adicione esta linha
+      - ${HOST_ROOT}:/app/host
+      - ./logs:/app/logs
+      - ./data:/app/data
     environment:
       - HOST_ROOT=${HOST_ROOT}
       - HOST_CWD=${HOST_CWD}

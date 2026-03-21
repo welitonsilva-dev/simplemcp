@@ -26,4 +26,4 @@ docker compose run --rm \
   -e CONTAINER_CWD="$CONTAINER_CWD" \
   -v "${HOST_ROOT}:/app/host" \
   -w "$CONTAINER_CWD" \
-  mcp-server "$@"
+  humancli-server "$@"

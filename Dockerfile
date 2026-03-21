@@ -9,7 +9,7 @@ COPY humancli-plugins/ ./humancli-plugins/
 WORKDIR /app/humancli-server
 
 RUN go mod download
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o mcp-server ./cmd/server
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o humancli-server ./cmd/server
 
 # stage 2 — runtime
 FROM debian:bookworm-slim
@@ -17,7 +17,7 @@ FROM debian:bookworm-slim
 RUN apt-get update && apt-get install -y ca-certificates curl && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-COPY --from=builder /app/humancli-server/mcp-server .
+COPY --from=builder /app/humancli-server/humancli-server .
 
 EXPOSE 8081
-CMD ["./mcp-server"]
+CMD ["./humancli-server"]

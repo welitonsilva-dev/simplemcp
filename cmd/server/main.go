@@ -7,9 +7,11 @@ import (
 	"humancli-server/internal/adapter/llm"
 	"humancli-server/internal/adapter/pipeline"
 	"humancli-server/internal/adapter/tools"
+	domainSession "humancli-server/internal/domain/session"
 	"humancli-server/internal/infra/config"
 	"humancli-server/internal/infra/logger"
 	"humancli-server/internal/infra/server"
+	infraSession "humancli-server/internal/infra/session"
 	"humancli-server/internal/usecase/agent"
 
 	// ferramentas nativas
@@ -47,14 +49,50 @@ func main() {
 	logger.Info("🚀 configurando registry de tools")
 	registry := tools.GlobalRegistry()
 
+	logger.Info("🚀 configurando session store")
+	sessions := buildSessionStore(cfg)
+
 	logger.Info("🚀 configurando agente (max_iterations=%d)", cfg.MaxIterations)
-	agentUseCase := agent.New(pipe, llmClient, registry, cfg.ConfidenceThreshold, cfg.MaxIterations)
+	agentUseCase := agent.New(
+		pipe,
+		llmClient,
+		registry,
+		sessions,
+		cfg.ConfidenceThreshold,
+		cfg.MaxIterations,
+	)
 
 	logger.Info("🚀 configurando servidor HTTP")
-	srv := server.New(cfg.Addr, cfg.APIKey, cfg.RateLimitIP, cfg.RateLimitGlobal, cfg.RateLimitWindow, cfg.RequestTimeout, agentUseCase)
+	srv := server.New(
+		cfg.Addr,
+		cfg.APIKey,
+		cfg.RateLimitIP,
+		cfg.RateLimitGlobal,
+		cfg.RateLimitWindow,
+		cfg.RequestTimeout,
+		agentUseCase,
+	)
 
 	logger.Info("🚀 humancli-server rodando em %s", cfg.Addr)
 	if err := srv.Start(); err != nil {
 		logger.Error("fatal: %v", err)
 	}
+}
+
+// buildSessionStore escolhe o store de sessões conforme a configuração.
+// SQLite é o padrão quando SESSION_DB_PATH está definido.
+// Fallback para memória se o caminho estiver vazio ou o banco falhar ao abrir.
+func buildSessionStore(cfg *config.Config) domainSession.Store {
+	if cfg.SessionDBPath != "" {
+		store, err := infraSession.NewSQLiteStore(cfg.SessionDBPath, cfg.SessionTTL)
+		if err != nil {
+			logger.Error("falha ao abrir SQLite (%s): %v — usando memória", cfg.SessionDBPath, err)
+		} else {
+			logger.Info("sessões persistidas em SQLite: %s (TTL: %s)", cfg.SessionDBPath, cfg.SessionTTL)
+			return store
+		}
+	}
+
+	logger.Info("sessões em memória (TTL: %s)", cfg.SessionTTL)
+	return infraSession.NewMemoryStore(cfg.SessionTTL)
 }

@@ -30,8 +30,8 @@ func NewClient(baseURL, model string) *Client {
 	return &Client{baseURL: baseURL, model: model}
 }
 
-// generate envia um prompt ao Ollama e retorna a resposta bruta.
-func (c *Client) generate(prompt string) (string, error) {
+// Generate envia um prompt ao Ollama e retorna a resposta bruta.
+func (c *Client) Generate(prompt string) (string, error) {
 	body, err := json.Marshal(ollamaRequest{
 		Model:  c.model,
 		Prompt: prompt,

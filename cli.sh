@@ -52,4 +52,4 @@ docker compose run --rm `
     -e HOST_OS=windows `
     -w $containerCWD `
     @volumeArgs `
-    mcp-server @Args
+    humancli-server @Args
