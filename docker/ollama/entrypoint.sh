@@ -11,7 +11,7 @@ until ollama list >/dev/null 2>&1; do
   sleep 2
 done
 
-MODEL=${LLM_MODEL:-qwen2.5:7b}
+MODEL=${HUMANCLI_MODEL:-qwen2.5:7b}
 
 echo "📦 Modelo configurado: $MODEL"
 
