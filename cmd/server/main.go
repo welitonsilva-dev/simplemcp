@@ -14,6 +14,8 @@ import (
 	infraSession "humancli-server/internal/infra/session"
 	"humancli-server/internal/usecase/agent"
 
+	"github.com/joho/godotenv"
+
 	// ferramentas nativas
 	_ "humancli-server/internal/adapter/tools/native/echo"
 	_ "humancli-server/internal/adapter/tools/native/filesystem"
@@ -24,6 +26,10 @@ import (
 
 func main() {
 	logger.Info("🚀 iniciando servidor")
+
+	if err := godotenv.Load(); err != nil {
+		logger.Info("⚠️  arquivo .env não encontrado ou erro ao carregar: %v", err)
+	}
 
 	logDir := os.Getenv("LOG_DIR")
 	if logDir == "" {
@@ -41,7 +47,7 @@ func main() {
 	}
 
 	logger.Info("🚀 configurando cliente LLM")
-	llmClient := llm.NewClient(cfg.OllamaURL, cfg.Model)
+	llmClient := llm.NewProvider(cfg)
 
 	logger.Info("🚀 configurando pipeline")
 	pipe := pipeline.New()

@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	"humancli-server/internal/adapter/llm"
 	"humancli-server/internal/adapter/pipeline"
 	"humancli-server/internal/domain/message"
+	llm "humancli-server/internal/domain/provider"
 	domainSession "humancli-server/internal/domain/session"
 	"humancli-server/internal/domain/tool"
 	"humancli-server/internal/infra/logger"
@@ -31,7 +31,7 @@ var destructiveTools = map[string]bool{
 // não conseguem escolher consistentemente entre dois formatos JSON diferentes.
 type AgentUseCase struct {
 	pipeline            *pipeline.Pipeline
-	llm                 *llm.Client
+	llm                 llm.Provider
 	registry            tool.ToolRegistry
 	sessions            domainSession.Store
 	confidenceThreshold float64
@@ -41,7 +41,7 @@ type AgentUseCase struct {
 // New cria um AgentUseCase com todas as dependências injetadas.
 func New(
 	p *pipeline.Pipeline,
-	l *llm.Client,
+	l llm.Provider,
 	r tool.ToolRegistry,
 	sessions domainSession.Store,
 	confidenceThreshold float64,

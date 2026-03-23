@@ -7,29 +7,8 @@ import (
 	"strings"
 
 	"humancli-server/internal/domain/plan"
+	"humancli-server/internal/infra/logger"
 )
-
-// Plan decide qual tool chamar nesta iteração.
-// Retorna um plano com a tool escolhida, ou tool="none" se não há ação necessária.
-func (c *Client) Plan(history, tools string) (*plan.ExecutionPlan, error) {
-	prompt := plannerPrompt(history, tools)
-	raw, err := c.Generate(prompt)
-	if err != nil {
-		return nil, fmt.Errorf("falha ao gerar plano: %w", err)
-	}
-	return parsePlan(raw)
-}
-
-// Finalize gera a resposta final em linguagem natural após o loop encerrar.
-// Chamado uma única vez quando o agente decide que a tarefa foi concluída.
-func (c *Client) Finalize(history string) (string, error) {
-	prompt := finalizerPrompt(history)
-	raw, err := c.Generate(prompt)
-	if err != nil {
-		return "", fmt.Errorf("falha ao gerar resposta final: %w", err)
-	}
-	return strings.TrimSpace(raw), nil
-}
 
 // parsePlan decodifica a resposta do plannerPrompt.
 // Espera: {"tool": "...", "params": {}, "confidence": 0.9}
@@ -43,15 +22,18 @@ func parsePlan(raw string) (*plan.ExecutionPlan, error) {
 	}
 
 	if err := json.Unmarshal([]byte(cleaned), &result); err != nil {
+		logger.Error("falha ao parsear plano: %v — raw: %s", err, raw)
 		return nil, fmt.Errorf("falha ao parsear plano: %w — raw: %s", err, cleaned)
 	}
 
 	if result.Tool == "" {
+		logger.Error("plano sem tool: %s", cleaned)
 		return nil, fmt.Errorf("plano sem tool: %s", cleaned)
 	}
 
 	// "none" sinaliza que o LLM não precisa mais de tools — encerra o loop
 	if result.Tool == "none" {
+		logger.Info("plano final recebido (tool=none)")
 		return &plan.ExecutionPlan{Final: true}, nil
 	}
 

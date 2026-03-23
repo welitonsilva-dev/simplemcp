@@ -5,12 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
+	"humancli-server/internal/domain/plan"
 	"humancli-server/internal/infra/logger"
 )
 
-// Client é o adaptador HTTP para o servidor Ollama.
-type Client struct {
+// Ollama é o adaptador HTTP para o servidor Ollama.
+type OllamaClient struct {
 	baseURL string
 	model   string
 }
@@ -25,13 +27,13 @@ type ollamaResponse struct {
 	Response string `json:"response"`
 }
 
-// NewClient retorna um novo Client configurado.
-func NewClient(baseURL, model string) *Client {
-	return &Client{baseURL: baseURL, model: model}
+// NewOllamaClient retorna um novo OllamaClient configurado.
+func NewOllamaClient(baseURL, model string) *OllamaClient {
+	return &OllamaClient{baseURL: baseURL, model: model}
 }
 
 // Generate envia um prompt ao Ollama e retorna a resposta bruta.
-func (c *Client) Generate(prompt string) (string, error) {
+func (c *OllamaClient) Generate(prompt string) (string, error) {
 	body, err := json.Marshal(ollamaRequest{
 		Model:  c.model,
 		Prompt: prompt,
@@ -67,4 +69,24 @@ func (c *Client) Generate(prompt string) (string, error) {
 	}
 
 	return result.Response, nil
+}
+
+// Plan cria o plano a partir do prompt de planejamento.
+func (c *OllamaClient) Plan(history, tools string) (*plan.ExecutionPlan, error) {
+	prompt := plannerPrompt(history, tools)
+	raw, err := c.Generate(prompt)
+	if err != nil {
+		return nil, fmt.Errorf("falha ao gerar plano: %w", err)
+	}
+	return parsePlan(raw)
+}
+
+// Finalize gera resposta final em linguagem natural.
+func (c *OllamaClient) Finalize(history string) (string, error) {
+	prompt := finalizerPrompt(history)
+	raw, err := c.Generate(prompt)
+	if err != nil {
+		return "", fmt.Errorf("falha ao gerar resposta final: %w", err)
+	}
+	return strings.TrimSpace(raw), nil
 }

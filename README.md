@@ -446,13 +446,13 @@ Consulte o [PLUGIN_README.md](./PLUGIN_README.md) para o guia completo passo a p
 O HumanCLI foi projetado para ser **agnóstico ao provedor de IA**. A variável `HUMANCLI_PROVIDER` define qual LLM será usado — sem alterar uma linha de código ou qualquer plugin existente.
 
 ```env
-# Provedor atual (implementado)
+# Provedores implementados
 HUMANCLI_PROVIDER=ollama      # LLM local via Ollama ou LM Studio
+HUMANCLI_PROVIDER=groq        # Llama 3.3, Mixtral (tier gratuito disponível)
 
 # Provedores planejados (não implementados ainda)
 HUMANCLI_PROVIDER=openai      # GPT-4o, GPT-4o-mini, GPT-3.5-turbo
 HUMANCLI_PROVIDER=anthropic   # Claude 3.5 Haiku, Claude 3.5 Sonnet
-HUMANCLI_PROVIDER=groq        # Llama 3.3, Mixtral (tier gratuito disponível)
 HUMANCLI_PROVIDER=openrouter  # Acesso a dezenas de modelos via uma só API
 ```
 
